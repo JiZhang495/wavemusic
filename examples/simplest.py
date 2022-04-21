@@ -1,8 +1,7 @@
-"""
-Written by JiZhang495 on 21 Apr 2022
-"""
+#!/usr/bin/env python3
 
-import wave, struct, math, time
+import wave, struct, math, time, os
+from sys import platform
 
 sampleRate = 44100.0 #Hz
 filename = 'music.wav'
@@ -122,4 +121,11 @@ play(4, 'Eb')
 
 file.close()
 time.sleep(0.1)
+
+if platform == "linux" or platform == "linux2":
+    os.system("aplay " + filename)
+elif platform == "darwin":
+    os.system("afplay " + filename)
+else:
+    print("unsupported platform:" + platform)
 
