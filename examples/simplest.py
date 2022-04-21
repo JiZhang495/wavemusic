@@ -3,7 +3,6 @@ Written by JiZhang495 on 21 Apr 2022
 """
 
 import wave, struct, math, time
-from playsound import playsound
 
 sampleRate = 44100.0 #Hz
 filename = 'music.wav'
@@ -123,5 +122,4 @@ play(4, 'Eb')
 
 file.close()
 time.sleep(0.1)
-playsound(filename) # play the WAV file written
 
