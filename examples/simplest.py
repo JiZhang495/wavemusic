@@ -126,8 +126,6 @@ if platform == "linux" or platform == "linux2":
     os.system("aplay " + filename)
 elif platform == "darwin":
     os.system("afplay " + filename)
-elif platform == "win32":
-    os.system("start " + filename)
 else:
     print("unsupported platform:" + platform)
 
