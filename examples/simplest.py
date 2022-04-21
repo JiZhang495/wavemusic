@@ -7,7 +7,7 @@ from playsound import playsound
 
 sampleRate = 44100.0 #Hz
 filename = 'music.wav'
-# If the path is included with the file name, make sure to use foward slash '/'
+# If a path is included with the file name, make sure to use foward slash '/'
 
 BPM = 100.0
 semiquaver = 15.0/BPM #s
