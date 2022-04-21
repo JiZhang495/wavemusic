@@ -27,7 +27,8 @@ file.setnchannels(1) #mono
 file.setsampwidth(2)
 file.setframerate(sampleRate)
 
-def play(length, note, octave=4, shape='q'):
+def play(length, note, octave=4, shape='q'): # "length" is measured as multiples of a semiquaver
+                  # the argument "note" takes either the note name or frequency (Hz) of the note
     if type(note) == str:
         note = freq[note] * math.pow(2,(octave-2)) #pitch
     frames = int(length * semiquaver * sampleRate)
