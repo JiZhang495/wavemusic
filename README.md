@@ -6,6 +6,7 @@ The *wave* module in the Python standard library provides a convenient interface
 References:
 <https://docs.python.org/3/library/wave.html>
 <https://www.tutorialspoint.com/read-and-write-wav-files-using-python-wave>  
+
 We intend to write some music with this module.  
 The *playsound* module can be used to play the WAV file generated. Run the following command to install it:
 
