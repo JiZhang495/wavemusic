@@ -14,9 +14,9 @@ semiquaver = 15.0/BPM #s
 
 A, As, B, C, Cs, D, Ds, E, F, Fs, G, Gs = \
         [55.00 * math.pow(2,(i/12)) for i in range(12)] #Hz
-A = A*2
-As = As*2
-B = B*2
+A *= 2
+As *= 2
+B *= 2
 # represent frequencies at 2nd octave
 freq = {'A': A, 'As': As, 'Bb': As, 'B': B, 'C': C, 'Cs': Cs, \
         'Db': Cs, 'D': D, 'Ds': Ds, 'Eb': Ds, 'E': E, 'F': F, \
@@ -35,14 +35,14 @@ def play(length, note, octave=4, shape='q'): # "length" is measured as multiples
     if shape == 'q': #square wave
         for i in range(frames):
             if int(float(i)/sampleRate*2*note)%2 == 0:
-                value = 1000
+                value = 2000
             else:
-                value = -1000
+                value = -2000
             data = struct.pack('<h', value)
             file.writeframesraw(data)
     elif shape == 's': #sine wave
         for i in range(frames):
-            value = int(3000 * math.sin(2 * math.pi * note * \
+            value = int(6000 * math.sin(2 * math.pi * note * \
                     float(i)/sampleRate))
             data = struct.pack('<h', value)
             file.writeframesraw(data)
@@ -122,6 +122,6 @@ play(4, 'Eb')
 
 
 file.close()
-time.sleep(1)
+time.sleep(0.1)
 playsound(filename) # play the WAV file written
 
