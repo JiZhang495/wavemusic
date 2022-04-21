@@ -15,6 +15,7 @@ The *playsound* module can be used to play the WAV file generated. Run the follo
 ```
 pip install playsound==1.2.2
 ```
+
 ----
 
 The *simplest.py* script in the *examples* folder demonstrates creation of simple monophonic melodies with sine waves and square waves. The song is "Ting Wo Shuo Xie Xie Ni". We would like to add more features to the program to produce chords and more complicated melodies in the future.  
