@@ -5,39 +5,36 @@ from sys import platform
 
 def play(sampleRate, length, note, octave=4, shape='q'):
     ''' "length" is measured as multiples of a semiquaver
-        the argument "note" takes either the note name or frequency (Hz) of the note
+        "note" takes either the note name or frequency (Hz) of the note
+        "X" is used as the note name of rests
     '''
     BPM = 100
     semiquaver = 15/BPM #s
 
-    A, As, B, C, Cs, D, Ds, E, F, Fs, G, Gs = \
-            [55 * math.pow(2,(i/12)) for i in range(12)] #Hz
-    A *= 2
-    As *= 2
-    B *= 2
-    # represent frequencies at 2nd octave
-    freq = {'A': A, 'As': As, 'Bb': As, 'B': B, 'C': C, 'Cs': Cs, \
-            'Db': Cs, 'D': D, 'Ds': Ds, 'Eb': Ds, 'E': E, 'F': F, \
-            'Fs': Fs, 'Gb': Fs, 'G': G, 'Gs': Gs, 'Ab': Gs, 'X': 0}
+    freq = {'C': -9, 'Cs': -8, 'Db': -8, 'D': -7, 'Ds': -6, 'Eb': -6, 'E': -5,
+            'F': -4, 'Fs': -3, 'Gb': -3, 'G': -2, 'Gs': -1, 'Ab': -1, 'A': 0,
+            'As': 1, 'Bb': 1, 'B': 2}
 
-    if type(note) == str:
-        note = freq[note] * math.pow(2,(octave-2)) #pitch
     frames = int(length * semiquaver * sampleRate)
     value = []
-    if note != 0:
+    if note == 'X' or note == 0:
+        for i in range(frames):
+            value.append(0)
+
+    else:
+        if type(note) == str:
+            note = 440 * math.pow(2, freq[note]/12 + octave - 4) #pitch
+
         if shape == 'q': #square wave
             for i in range(frames):
-                if int(float(i)/sampleRate*2*note)%2 == 0:
+                if int(float(i)/sampleRate*2*note)%2:
                     value.append(2000)
                 else:
                     value.append(-2000)
 
         elif shape == 's': #sine wave
             for i in range(frames):
-                value.append(int(6000 * math.sin(2 * math.pi * note * i/sampleRate)))
-    else:
-        for i in range(frames):
-            value.append(0)
+                value.append(int(6000*math.sin(2*math.pi*note*i/sampleRate)))
 
     return value
 
@@ -55,21 +52,75 @@ def main():
     sampleRate = 44100 #Hz
     file.setframerate(sampleRate)
 
-    rawdata = []
+    score = [ [1, 'X'],
+            [2, 'Eb', 4, 's'],
+            [2, 'F',  4, 's'],
+            [2, 'G',  4, 's'],
+            [2, 'Bb', 4, 's'],
+            [2, 'G',  4, 's'],
+            [3, 'G',  4, 's'],
+            [1, 'X'],
+            [1, 'F',  4, 's'],
+            [1, 'F',  4, 's'],
+            [2, 'Eb', 4, 's'],
+            [3, 'F',  4, 's'],
+            [1, 'X'],
+            [2, 'Eb', 4, 's'],
+            [2, 'C',  4, 's'],
+            [2, 'Eb', 4, 's'],
+            [2, 'F',  4, 's'],
+            [5, 'G',  4, 's'],
+            [3, 'X'],
+            [2, 'Eb', 4, 's'],
+            [2, 'C',  4, 's'],
+            [3, 'Eb', 4, 's'],
+            [1, 'X'],
+            [1, 'Bb', 3, 's'],
+            [1, 'Bb', 3, 's'],
+            [2, 'F',  4, 's'],
+            [3, 'Eb', 4, 's'],
+            [1, 'X'],
+            [2, 'G',  4, 's'],
+            [2, 'F',  4, 's'],
+            [2, 'F',  4, 's'],
+            [2, 'Eb', 4, 's'],
+            [4, 'F',  4, 's'],
+            [2, 'Eb'],
+            [2, 'F'],
+            [2, 'Bb'],
+            [2, 'G'],
+            [3, 'G'],
+            [1, 'X'],
+            [1, 'F'],
+            [1, 'F'],
+            [2, 'Eb'],
+            [3, 'F'],
+            [1, 'X'],
+            [2, 'Eb'],
+            [2, 'C'],
+            [2, 'Eb'],
+            [2, 'Bb'],
+            [5, 'G'],
+            [3, 'X'],
+            [2, 'Eb'],
+            [2, 'C'],
+            [3, 'Eb'],
+            [1, 'X'],
+            [1, 'Bb', 3],
+            [1, 'Bb', 3],
+            [2, 'F'],
+            [3, 'Eb'],
+            [1, 'X'],
+            [2, 'G'],
+            [2, 'F'],
+            [2, 'Eb'],
+            [2, 'C'],
+            [4, 'Eb'] ]
+
     # Writing a monophonic melody
-    rawdata.extend(play(sampleRate, 1, 'X'))
-    rawdata.extend(play(sampleRate, 2, 'Eb',4, 's'))
-    rawdata.extend(play(sampleRate, 2, 'F',4, 's'))
-    rawdata.extend(play(sampleRate, 2, 'G',4, 's'))
-    rawdata.extend(play(sampleRate, 2, 'Bb',4, 's'))
-    rawdata.extend(play(sampleRate, 2, 'G',4, 's'))
-    rawdata.extend(play(sampleRate, 3, 'G',4, 's'))
-    rawdata.extend(play(sampleRate, 1, 'X'))
-    rawdata.extend(play(sampleRate, 1, 'F',4, 's'))
-    rawdata.extend(play(sampleRate, 1, 'F',4, 's'))
-    rawdata.extend(play(sampleRate, 2, 'Eb',4, 's'))
-    rawdata.extend(play(sampleRate, 3, 'F',4, 's'))
-    rawdata.extend(play(sampleRate, 1, 'X'))
+    rawdata = []
+    for note in score:
+        rawdata.extend(play(sampleRate, *note))
 
     write(file, rawdata)
 
