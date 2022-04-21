@@ -13,7 +13,7 @@ We intend to write some music with this module.
 
 The *playsound* module can be used to play the WAV file generated. Run the following command to install it:
 
-  pip install playsound
+  pip install playsound==1.2.2
 
 ----
 
