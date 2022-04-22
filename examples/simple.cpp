@@ -29,9 +29,8 @@ int main(void) {
 
     // make a square wave
     bool sign = true;
-    float half_period;
-    half_period = sr/440/2;
-    int count = half_period;
+    float half_period = sr/440/2;
+    float count = half_period;
 
     for(int i = 0; i < length; ++i) {
         if (sign) {
@@ -40,7 +39,7 @@ int main(void) {
             pcm_data[i] = -2000;
         }
 
-        --count;
+        count -= 1.0;
         if (count < 0) {
             count += half_period;
             sign = !sign;
