@@ -34,7 +34,7 @@ void play(std::ofstream& fout, uint32_t& data_size, shape_t shape,
     if(shape != none) { assert(freq != 0.0 && octave != 0); }
 
     freq = freq * pow(2.0, octave-4);
-    uint16_t pcm_data;
+    int16_t pcm_data;
     float smqvr = 15.0/BPM;
     float s_len = smqvr*length*S_RATE; // length in number of samples
 
