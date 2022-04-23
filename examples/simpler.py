@@ -28,9 +28,9 @@ def play(sampleRate, length, note, octave=4, shape='q'):
         if shape == 'q': #square wave
             for i in range(frames):
                 if int(float(i)/sampleRate*2*note)%2:
-                    value.append(2000)
-                else:
                     value.append(-2000)
+                else:
+                    value.append(2000)
 
         elif shape == 's': #sine wave
             for i in range(frames):
