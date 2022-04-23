@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <unordered_map>
 #include <cmath>
 
 #define S_RATE 44100
@@ -20,7 +22,6 @@ typedef struct WAV_HEADER {
     uint8_t  data[4]       = {'d', 'a', 't', 'a'};
     uint32_t data_size     = 0;                  // calculate and fill in later
 } wav_hdr_t;
-
 
 // make a square wave
 void square(std::ofstream& fout, uint32_t& data_size,
@@ -49,9 +50,20 @@ void square(std::ofstream& fout, uint32_t& data_size,
     }
 }
 
-
 int main(void) {
     static_assert(sizeof(wav_hdr_t) == 44, "wav_hdr_t size error");
+
+    // build frequency look-up table
+    std::unordered_map<std::string, float> freq_lut = {
+        {"C", -9}, {"Cs", -8}, {"Db", -8}, {"D", -7}, {"Ds", -6}, {"Eb", -6},
+        {"E", -5}, {"F", -4}, {"Fs", -3}, {"Gb", -3}, {"G", -2}, {"Gs", -1},
+        {"Ab", -1}, {"A", 0}, {"As", 1}, {"Bb", 1}, {"B", 2}
+    };
+
+    for(auto& i : freq_lut) {
+        i.second = 440.0 * pow(2.0, i.second/12);
+    }
+
     wav_hdr_t wav_hdr;
     uint32_t data_size = 0;
 
@@ -60,12 +72,12 @@ int main(void) {
     fout.open("m.wav", std::ios::binary);
     fout.write(reinterpret_cast<const char *>(&wav_hdr), sizeof(wav_hdr_t));
 
-    square(fout, data_size, 2, 440);
-    square(fout, data_size, 2, 220);
-    square(fout, data_size, 2, 440);
-    square(fout, data_size, 2, 220);
-    square(fout, data_size, 2, 440);
-    square(fout, data_size, 2, 220);
+    square(fout, data_size, 2, freq_lut["C"]);
+    square(fout, data_size, 2, freq_lut["Eb"]);
+    square(fout, data_size, 2, freq_lut["F"]);
+    square(fout, data_size, 2, freq_lut["G"]);
+    square(fout, data_size, 2, freq_lut["A"]);
+    square(fout, data_size, 4, freq_lut["C"]);
 
     // calculate header and overwrite with correct size bits
     wav_hdr.data_size = data_size;
