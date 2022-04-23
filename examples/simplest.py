@@ -1,7 +1,3 @@
-"""
-Written by JiZhang495 on 21 Apr 2022
-"""
-
 import wave, struct, math, time
 from playsound import playsound
 
@@ -122,6 +118,4 @@ play(4, 'Eb')
 
 
 file.close()
-time.sleep(0.1)
 playsound(filename) # play the WAV file written
-
