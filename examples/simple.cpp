@@ -8,6 +8,14 @@
 #define S_RATE 44100
 #define BPM 100
 
+// Forward declarations
+typedef struct Wav_Header wav_hdr_t;
+enum shape_t: uint8_t;
+class note_t;
+void play(std::ofstream &fout, uint32_t &data_size, note_t note);
+void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
+          unsigned int length, float freq, int octave);
+
 typedef struct Wav_Header {
     uint8_t  riff[4]       = {'R', 'I', 'F', 'F'};
     uint32_t file_size     = 0;                  // calculate and fill in later
@@ -24,7 +32,7 @@ typedef struct Wav_Header {
     uint32_t data_size     = 0;                  // calculate and fill in later
 } wav_hdr_t;
 
-enum shape_t {none, sine, square, triangle, saw};
+enum shape_t: uint8_t {none, sine, square, triangle, saw};
 
 class note_t {
 private:
@@ -61,7 +69,12 @@ public:
     }
 };
 
-// write one note
+// write one note with note_t
+void play(std::ofstream &fout, uint32_t &data_size, note_t note) {
+    play(fout, data_size, note.shape, note.length, note.freq, note.octave);
+}
+
+// write one note with note parameters
 void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
           unsigned int length, float freq = 0.0, int octave = 4) {
 
@@ -113,10 +126,6 @@ void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
         fout.write(reinterpret_cast<char *>(&pcm_data), sizeof(uint16_t));
         data_size += sizeof(uint16_t);
     }
-}
-
-void play_note(std::ofstream &fout, uint32_t &data_size, note_t note) {
-    play(fout, data_size, note.shape, note.length, note.freq, note.octave);
 }
 
 int main(void) {
@@ -198,7 +207,7 @@ int main(void) {
     };
 
     for(const note_t &note: score) {
-        play_note(fout, data_size, note);
+        play(fout, data_size, note);
     }
 
     // calculate header and overwrite with correct size bits
