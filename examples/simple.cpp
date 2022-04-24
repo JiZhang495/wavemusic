@@ -8,7 +8,7 @@
 #define S_RATE 44100
 #define BPM 100
 
-typedef struct WAV_HEADER {
+typedef struct Wav_Header {
     uint8_t  riff[4]       = {'R', 'I', 'F', 'F'};
     uint32_t file_size     = 0;                  // calculate and fill in later
     uint8_t  wave[4]       = {'W', 'A', 'V', 'E'};
@@ -26,8 +26,42 @@ typedef struct WAV_HEADER {
 
 enum shape_t {none, sine, square, triangle, saw};
 
+class note_t {
+private:
+    // build frequency look-up table
+    static std::unordered_map<std::string, float> construct_lut() {
+        std::unordered_map<std::string, float> f_lut = {
+            {"C", -9}, {"Cs", -8}, {"Db", -8}, {"D", -7}, {"Ds", -6}, {"Eb", -6},
+            {"E", -5}, {"F", -4}, {"Fs", -3}, {"Gb", -3}, {"G", -2}, {"Gs", -1},
+            {"Ab", -1}, {"A", 0}, {"As", 1}, {"Bb", 1}, {"B", 2}
+        };
+
+        for(auto &i: f_lut) {
+            i.second = 440.0 * pow(2.0, i.second/12);
+        }
+
+        return f_lut;
+    }
+
+public:
+    shape_t      shape;
+    unsigned int length;
+    std::string  name ;
+    int          octave;
+    float        freq;
+
+    note_t(shape_t s, unsigned int l, std::string n = "X", int o = 0) {
+        static std::unordered_map<std::string, float> f_lut = construct_lut();
+        shape  = s;
+        length = l;
+        name   = n;
+        octave = o;
+        freq   = f_lut[n];
+    }
+};
+
 // write one note
-void play(std::ofstream& fout, uint32_t& data_size, shape_t shape,
+void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
           unsigned int length, float freq = 0.0, int octave = 0) {
 
     assert(length != 0);
@@ -80,94 +114,92 @@ void play(std::ofstream& fout, uint32_t& data_size, shape_t shape,
     }
 }
 
+void play_note(std::ofstream &fout, uint32_t &data_size, note_t note) {
+    play(fout, data_size, note.shape, note.length, note.freq, note.octave);
+}
+
 int main(void) {
     static_assert(sizeof(wav_hdr_t) == 44, "wav_hdr_t size error");
 
-    // build frequency look-up table
-    std::unordered_map<std::string, float> freq_lut = {
-        {"C", -9}, {"Cs", -8}, {"Db", -8}, {"D", -7}, {"Ds", -6}, {"Eb", -6},
-        {"E", -5}, {"F", -4}, {"Fs", -3}, {"Gb", -3}, {"G", -2}, {"Gs", -1},
-        {"Ab", -1}, {"A", 0}, {"As", 1}, {"Bb", 1}, {"B", 2}
-    };
-
-    for(auto& i: freq_lut) {
-        i.second = 440.0 * pow(2.0, i.second/12);
-    }
-
+    // write file
     wav_hdr_t wav_hdr;
     uint32_t data_size = 0;
 
-    // write file
     std::ofstream fout;
     fout.open("m.wav", std::ios::binary);
     fout.write(reinterpret_cast<const char *>(&wav_hdr), sizeof(wav_hdr_t));
 
-    // TODO: make this simpler to write
-    play(fout, data_size, none,   1);
-    play(fout, data_size, sine,   2, freq_lut["Eb"], 4);
-    play(fout, data_size, sine,   2, freq_lut["F"],  4);
-    play(fout, data_size, sine,   2, freq_lut["G"],  4);
-    play(fout, data_size, sine,   2, freq_lut["Bb"], 4);
-    play(fout, data_size, sine,   2, freq_lut["G"],  4);
-    play(fout, data_size, sine,   3, freq_lut["G"],  4);
-    play(fout, data_size, none,   1);
-    play(fout, data_size, sine,   1, freq_lut["F"],  4);
-    play(fout, data_size, sine,   1, freq_lut["F"],  4);
-    play(fout, data_size, sine,   2, freq_lut["Eb"], 4);
-    play(fout, data_size, sine,   3, freq_lut["F"],  4);
-    play(fout, data_size, none,   1);
-    play(fout, data_size, sine,   2, freq_lut["Eb"], 4);
-    play(fout, data_size, sine,   2, freq_lut["C"],  4);
-    play(fout, data_size, sine,   2, freq_lut["Eb"], 4);
-    play(fout, data_size, sine,   2, freq_lut["F"],  4);
-    play(fout, data_size, sine,   5, freq_lut["G"],  4);
-    play(fout, data_size, none,   3);
-    play(fout, data_size, sine,   2, freq_lut["Eb"], 4);
-    play(fout, data_size, sine,   2, freq_lut["C"],  4);
-    play(fout, data_size, sine,   3, freq_lut["Eb"], 4);
-    play(fout, data_size, none,   1);
-    play(fout, data_size, sine,   1, freq_lut["Bb"], 3);
-    play(fout, data_size, sine,   1, freq_lut["Bb"], 3);
-    play(fout, data_size, sine,   2, freq_lut["F"],  4);
-    play(fout, data_size, sine,   3, freq_lut["Eb"], 4);
-    play(fout, data_size, none,   1);
-    play(fout, data_size, sine,   2, freq_lut["G"],  4);
-    play(fout, data_size, sine,   2, freq_lut["F"],  4);
-    play(fout, data_size, sine,   2, freq_lut["F"],  4);
-    play(fout, data_size, sine,   2, freq_lut["Eb"], 4);
-    play(fout, data_size, sine,   4, freq_lut["F"],  4);
-    play(fout, data_size, square, 2, freq_lut["Eb"], 4);
-    play(fout, data_size, square, 2, freq_lut["F"],  4);
-    play(fout, data_size, square, 2, freq_lut["Bb"], 4);
-    play(fout, data_size, square, 2, freq_lut["G"],  4);
-    play(fout, data_size, square, 3, freq_lut["G"],  4);
-    play(fout, data_size, none,   1);
-    play(fout, data_size, square, 1, freq_lut["F"],  4);
-    play(fout, data_size, square, 1, freq_lut["F"],  4);
-    play(fout, data_size, square, 2, freq_lut["Eb"], 4);
-    play(fout, data_size, square, 3, freq_lut["F"],  4);
-    play(fout, data_size, none,   1);
-    play(fout, data_size, square, 2, freq_lut["Eb"], 4);
-    play(fout, data_size, square, 2, freq_lut["C"],  4);
-    play(fout, data_size, square, 2, freq_lut["Eb"], 4);
-    play(fout, data_size, square, 2, freq_lut["Bb"], 4);
-    play(fout, data_size, square, 5, freq_lut["G"],  4);
-    play(fout, data_size, none,   3);
-    play(fout, data_size, square, 2, freq_lut["Eb"], 4);
-    play(fout, data_size, square, 2, freq_lut["C"],  4);
-    play(fout, data_size, square, 3, freq_lut["Eb"], 4);
-    play(fout, data_size, none,   1);
-    play(fout, data_size, square, 1, freq_lut["Bb"], 3);
-    play(fout, data_size, square, 1, freq_lut["Bb"], 3);
-    play(fout, data_size, square, 2, freq_lut["F"],  4);
-    play(fout, data_size, square, 3, freq_lut["Eb"], 4);
-    play(fout, data_size, none,   1);
-    play(fout, data_size, square, 2, freq_lut["G"],  4);
-    play(fout, data_size, square, 2, freq_lut["F"],  4);
-    play(fout, data_size, square, 2, freq_lut["Eb"], 4);
-    play(fout, data_size, square, 2, freq_lut["C"],  4);
-    play(fout, data_size, square, 4, freq_lut["Eb"], 4);
+    // TODO: stop calling freq_lut manually every time
+    note_t score[] = {
+        {none,   1},
+        {sine,   2, "Eb", 4},
+        {sine,   2, "F",  4},
+        {sine,   2, "G",  4},
+        {sine,   2, "Bb", 4},
+        {sine,   2, "G",  4},
+        {sine,   3, "G",  4},
+        {none,   1},
+        {sine,   1, "F",  4},
+        {sine,   1, "F",  4},
+        {sine,   2, "Eb", 4},
+        {sine,   3, "F",  4},
+        {none,   1},
+        {sine,   2, "Eb", 4},
+        {sine,   2, "C",  4},
+        {sine,   2, "Eb", 4},
+        {sine,   2, "F",  4},
+        {sine,   5, "G",  4},
+        {none,   3},
+        {sine,   2, "Eb", 4},
+        {sine,   2, "C",  4},
+        {sine,   3, "Eb", 4},
+        {none,   1},
+        {sine,   1, "Bb", 3},
+        {sine,   1, "Bb", 3},
+        {sine,   2, "F",  4},
+        {sine,   3, "Eb", 4},
+        {none,   1},
+        {sine,   2, "G",  4},
+        {sine,   2, "F",  4},
+        {sine,   2, "F",  4},
+        {sine,   2, "Eb", 4},
+        {sine,   4, "F",  4},
+        {square, 2, "Eb", 4},
+        {square, 2, "F",  4},
+        {square, 2, "Bb", 4},
+        {square, 2, "G",  4},
+        {square, 3, "G",  4},
+        {none,   1},
+        {square, 1, "F",  4},
+        {square, 1, "F",  4},
+        {square, 2, "Eb", 4},
+        {square, 3, "F",  4},
+        {none,   1},
+        {square, 2, "Eb", 4},
+        {square, 2, "C",  4},
+        {square, 2, "Eb", 4},
+        {square, 2, "Bb", 4},
+        {square, 5, "G",  4},
+        {none,   3},
+        {square, 2, "Eb", 4},
+        {square, 2, "C",  4},
+        {square, 3, "Eb", 4},
+        {none,   1},
+        {square, 1, "Bb", 3},
+        {square, 1, "Bb", 3},
+        {square, 2, "F",  4},
+        {square, 3, "Eb", 4},
+        {none,   1},
+        {square, 2, "G",  4},
+        {square, 2, "F",  4},
+        {square, 2, "Eb", 4},
+        {square, 2, "C",  4},
+        {square, 4, "Eb", 4},
+    };
 
+    for(const note_t &note: score) {
+        play_note(fout, data_size, note);
+    }
 
     // calculate header and overwrite with correct size bits
     wav_hdr.data_size = data_size;
