@@ -29,8 +29,9 @@ enum shape_t {none, sine, square, triangle, saw};
 class note_t {
 private:
     // build frequency look-up table
-    static std::unordered_map<std::string, float> construct_lut() {
-        std::unordered_map<std::string, float> f_lut = {
+    typedef std::unordered_map<std::string, float> f_lut_t;
+    static f_lut_t construct_lut() {
+        f_lut_t f_lut = {
             {"C", -9}, {"Cs", -8}, {"Db", -8}, {"D", -7}, {"Ds", -6}, {"Eb", -6},
             {"E", -5}, {"F", -4}, {"Fs", -3}, {"Gb", -3}, {"G", -2}, {"Gs", -1},
             {"Ab", -1}, {"A", 0}, {"As", 1}, {"Bb", 1}, {"B", 2}
@@ -46,12 +47,12 @@ private:
 public:
     shape_t      shape;
     unsigned int length;
-    std::string  name ;
+    std::string  name;
     int          octave;
     float        freq;
 
     note_t(shape_t s, unsigned int l, std::string n = "X", int o = 0) {
-        static std::unordered_map<std::string, float> f_lut = construct_lut();
+        static f_lut_t f_lut = construct_lut();
         shape  = s;
         length = l;
         name   = n;
@@ -62,7 +63,7 @@ public:
 
 // write one note
 void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
-          unsigned int length, float freq = 0.0, int octave = 0) {
+          unsigned int length, float freq = 0.0, int octave = 4) {
 
     assert(length != 0);
     if(shape != none) { assert(freq != 0.0 && octave != 0); }
@@ -129,7 +130,6 @@ int main(void) {
     fout.open("m.wav", std::ios::binary);
     fout.write(reinterpret_cast<const char *>(&wav_hdr), sizeof(wav_hdr_t));
 
-    // TODO: stop calling freq_lut manually every time
     note_t score[] = {
         {none,   1},
         {sine,   2, "Eb", 4},
