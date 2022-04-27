@@ -7,6 +7,9 @@
 
 #define S_RATE 44100
 #define BPM 100
+#define SIN_AMP 6000
+#define SQR_AMP 2000
+#define SAW_AMP 3000
 
 // Forward declarations
 typedef struct Wav_Header wav_hdr_t;
@@ -45,9 +48,7 @@ private:
             {"Ab", -1}, {"A", 0}, {"As", 1}, {"Bb", 1}, {"B", 2}
         };
 
-        for(auto &i: f_lut) {
-            i.second = 440.0 * pow(2.0, i.second/12);
-        }
+        for(auto &i: f_lut) { i.second = 440.0 * pow(2.0, i.second/12); }
 
         return f_lut;
     }
@@ -84,33 +85,51 @@ void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
     freq = freq * pow(2.0, octave-4);
     int16_t pcm_data;
     float smqvr = 15.0/BPM;
-    float s_len = smqvr*length*S_RATE; // length in number of samples
+    unsigned int s_len = rint(smqvr*length*S_RATE); // length in number of samples
 
-    // only used for square
-    bool sign = true;
-    float half_period = S_RATE/freq/2.0;
-    float count = half_period;
+    bool sign;
+    float period;
+    float count;
+    float gradient;
+    // initialise variables
+    switch (shape) {
+        case none:
+        case sine:
+            break;
+        case square:
+            sign = true;
+            period = S_RATE/freq/2.0;
+            count = period;
+            break;
+        case triangle:
+            // TODO
+            break;
+        case saw:
+            period = S_RATE/freq;
+            gradient = 2.0*(float)SAW_AMP/period;
+            break;
+    }
 
-    for(unsigned int i = 0; i < round(s_len); ++i) {
+    for(unsigned int i = 0; i < s_len; ++i) {
         switch (shape) {
             case none:
                 pcm_data = 0;
                 break;
 
             case sine:
-                pcm_data = round(6000.0 * sin(2.0*M_PI*freq*i/S_RATE));
+                pcm_data = rint((float)SIN_AMP * sin(2.0*M_PI*freq*i/S_RATE));
                 break;
 
             case square:
                 if (sign) {
-                    pcm_data = 2000;
+                    pcm_data = SQR_AMP;
                 } else {
-                    pcm_data = -2000;
+                    pcm_data = -SQR_AMP;
                 }
 
                 count -= 1.0;
                 if (count < 0) {
-                    count += half_period;
+                    count += period;
                     sign = !sign;
                 }
                 break;
@@ -120,7 +139,7 @@ void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
                 break;
 
             case saw:
-                // TODO
+                pcm_data = (i % (int)rint(period)) * gradient - SAW_AMP;
                 break;
         }
         fout.write(reinterpret_cast<char *>(&pcm_data), sizeof(uint16_t));
@@ -163,21 +182,21 @@ int main(void) {
         {sine,   2, "C",  4},
         {sine,   3, "Eb", 4},
         {none,   1},
-        {sine,   1, "Bb", 3},
-        {sine,   1, "Bb", 3},
-        {sine,   2, "F",  4},
-        {sine,   3, "Eb", 4},
+        {saw,    1, "Bb", 3},
+        {saw,    1, "Bb", 3},
+        {saw,    2, "F",  4},
+        {saw,    3, "Eb", 4},
         {none,   1},
-        {sine,   2, "G",  4},
-        {sine,   2, "F",  4},
-        {sine,   2, "F",  4},
-        {sine,   2, "Eb", 4},
-        {sine,   4, "F",  4},
-        {square, 2, "Eb", 4},
-        {square, 2, "F",  4},
-        {square, 2, "Bb", 4},
-        {square, 2, "G",  4},
-        {square, 3, "G",  4},
+        {saw,    2, "G",  4},
+        {saw,    2, "F",  4},
+        {saw,    2, "F",  4},
+        {saw,    2, "Eb", 4},
+        {saw,    4, "F",  4},
+        {saw,    2, "Eb", 4},
+        {saw,    2, "F",  4},
+        {saw,    2, "Bb", 4},
+        {saw,    2, "G",  4},
+        {saw,    3, "G",  4},
         {none,   1},
         {square, 1, "F",  4},
         {square, 1, "F",  4},
