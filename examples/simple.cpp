@@ -10,7 +10,6 @@
 #define SIN_AMP 6000
 #define SQR_AMP 2000
 #define SAW_AMP 3000
-#define T 0.1
 
 // Forward declarations
 typedef struct Wav_Header wav_hdr_t;
@@ -71,14 +70,24 @@ public:
     }
 };
 
-// attack and sustain curve
-// with T as the time factor
-//   y = 1 - e^(-t/T)
-// release curve
-// with r as time since release
-//   y = e^(-(t-r)/T)
-float filter(unsigned int i) {
-    return exp(-i/T);
+// TODO: separate sustain section where gain = 1 to avoid exp calculation at every sample
+float filter(int i, unsigned int s_len) {
+    // assume 99% volume reduction by 0.02s
+    // k = -0.02/ln(0.01) = 0.004343
+    static float k = -(0.02*S_RATE/log(0.01));
+    int rel_start = s_len - (int)(0.02*S_RATE);
+    float gain;
+    if (i > rel_start) {
+        // release curve in seconds
+        // y = e^(-(t-0.02)/k)
+        gain = exp((rel_start-i)/k);
+        return gain;
+    } else {
+        // attack and sustain curve
+        // y = 1 - e^(-t/k)
+        gain = 1.0-exp(-i/k);
+        return gain;
+    }
 }
 
 // write one note with note_t
@@ -91,11 +100,13 @@ void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
           unsigned int length, float freq = 0.0, int octave = 4) {
 
     assert(length != 0);
-    if(shape != none) { assert(freq != 0.0 && octave != 0); }
+    if (shape != none) { assert(freq != 0.0 && octave != 0); }
 
     freq = freq * pow(2.0, octave-4);
+    float wave;
+    float gain;
     int16_t pcm_data;
-    float smqvr = 15.0/BPM;
+    static float smqvr = 15.0/BPM;
     unsigned int s_len = rint(smqvr*length*S_RATE); // length in number of samples
 
     bool sign;
@@ -110,7 +121,7 @@ void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
         case square:
             sign = true;
             period = S_RATE/freq/2.0;
-            count = period;
+            count = 0.0;
             break;
         case triangle:
             // TODO
@@ -118,7 +129,7 @@ void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
         case saw:
             period = S_RATE/freq;
             gradient = 2.0*(float)SAW_AMP/period;
-            count = 0.0; // upward ramp
+            count = 0.0;
             break;
     }
 
@@ -129,19 +140,19 @@ void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
                 break;
 
             case sine:
-                pcm_data = rint((float)SIN_AMP * sin(2.0*M_PI*freq*i/S_RATE));
+                wave = (float)SIN_AMP * sin(2.0*M_PI*freq*i/S_RATE);
                 break;
 
             case square:
                 if (sign) {
-                    pcm_data = SQR_AMP;
+                    wave = SQR_AMP;
                 } else {
-                    pcm_data = -SQR_AMP;
+                    wave = -SQR_AMP;
                 }
 
-                count -= 1.0;
-                if (count < 0) {
-                    count += period;
+                count += 1.0;
+                if (count > period) {
+                    count = 0.0;
                     sign = !sign;
                 }
                 break;
@@ -151,13 +162,19 @@ void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
                 break;
 
             case saw:
-                pcm_data = count * gradient - SAW_AMP;
+                wave = count * gradient - SAW_AMP;
                 count += 1.0;
                 if (count > period) {
                     count = 0.0;
                 }
                 break;
         }
+        if (shape == none) {
+            gain = 0;
+        } else {
+            gain = filter((int)i, s_len);
+        }
+        pcm_data = gain * wave;
         fout.write(reinterpret_cast<char *>(&pcm_data), sizeof(uint16_t));
         data_size += sizeof(uint16_t);
     }
