@@ -18,6 +18,7 @@ class note_t;
 void play(std::ofstream &fout, uint32_t &data_size, note_t note);
 void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
           unsigned int length, float freq, int octave);
+float filter(int i, unsigned int s_len);
 
 typedef struct Wav_Header {
     uint8_t  riff[4]       = {'R', 'I', 'F', 'F'};
@@ -48,7 +49,7 @@ private:
             {"Ab", -1}, {"A", 0}, {"As", 1}, {"Bb", 1}, {"B", 2}
         };
 
-        for(auto &i: f_lut) { i.second = 440.0 * pow(2.0, i.second/12); }
+        for (auto &i: f_lut) { i.second = 440.0 * pow(2.0, i.second/12); }
 
         return f_lut;
     }
@@ -81,13 +82,12 @@ float filter(int i, unsigned int s_len) {
         // release curve in seconds
         // y = e^(-(t-0.02)/k)
         gain = exp((rel_start-i)/k);
-        return gain;
     } else {
         // attack and sustain curve
         // y = 1 - e^(-t/k)
         gain = 1.0-exp(-i/k);
-        return gain;
     }
+    return gain;
 }
 
 // write one note with note_t
@@ -133,7 +133,7 @@ void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
             break;
     }
 
-    for(unsigned int i = 0; i < s_len; ++i) {
+    for (unsigned int i = 0; i < s_len; ++i) {
         switch (shape) {
             case none:
                 pcm_data = 0;
@@ -258,7 +258,7 @@ int main(void) {
         {square, 4, "Eb", 4},
     };
 
-    for(const note_t &note: score) {
+    for (const note_t &note: score) {
         play(fout, data_size, note);
     }
 
