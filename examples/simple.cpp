@@ -10,6 +10,7 @@
 #define SIN_AMP 6000
 #define SQR_AMP 2000
 #define SAW_AMP 3000
+#define T 0.1
 
 // Forward declarations
 typedef struct Wav_Header wav_hdr_t;
@@ -70,6 +71,16 @@ public:
     }
 };
 
+// attack and sustain curve
+// with T as the time factor
+//   y = 1 - e^(-t/T)
+// release curve
+// with r as time since release
+//   y = e^(-(t-r)/T)
+float filter(unsigned int i) {
+    return exp(-i/T);
+}
+
 // write one note with note_t
 void play(std::ofstream &fout, uint32_t &data_size, note_t note) {
     play(fout, data_size, note.shape, note.length, note.freq, note.octave);
@@ -107,6 +118,7 @@ void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
         case saw:
             period = S_RATE/freq;
             gradient = 2.0*(float)SAW_AMP/period;
+            count = 0.0; // upward ramp
             break;
     }
 
@@ -139,7 +151,11 @@ void play(std::ofstream &fout, uint32_t &data_size, shape_t shape,
                 break;
 
             case saw:
-                pcm_data = (i % (int)rint(period)) * gradient - SAW_AMP;
+                pcm_data = count * gradient - SAW_AMP;
+                count += 1.0;
+                if (count > period) {
+                    count = 0.0;
+                }
                 break;
         }
         fout.write(reinterpret_cast<char *>(&pcm_data), sizeof(uint16_t));
