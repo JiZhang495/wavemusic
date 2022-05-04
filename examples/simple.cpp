@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cassert>
 #include <vector>
+#include <regex>
 
 #define S_RATE 44100
 #define BPM 100
@@ -66,6 +67,7 @@ public:
     int          octave;
     float        freq;
 
+
     note_t(shape_t s, unsigned int l, std::string n = "X", int o = 0) {
         static f_lut_t f_lut = construct_lut();
         shape  = s;
@@ -75,6 +77,28 @@ public:
         freq   = f_lut[n];
     }
 };
+
+// debug code, use if DEBUG in the future
+std::ostream &operator<<(std::ostream &os, note_t const &note) {
+    os << note.shape << " " << note.length << " " << note.name << " "
+       << note.freq << " " << note.octave << std::endl;
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, std::vector<note_t> const &stave) {
+    for (const auto &note: stave) {
+        os << note;
+    }
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, std::vector<std::vector<note_t>> const &score) {
+    for (const auto &stave: score) {
+        os << "=== stave break ===" << std::endl;
+        os << stave << std::endl;
+    }
+    return os;
+}
 
 // TODO: separate sustain section where gain = 1 to avoid exp calculation at every sample
 float filter(int i, unsigned int s_len) {
@@ -204,65 +228,64 @@ int main(void) {
     f.open("m.wav", std::ios::binary);
     f.write(reinterpret_cast<const char *>(&wav_hdr), sizeof(wav_hdr_t));
 
-    std::vector<std::vector<note_t>> score = {
-        // stave 1
-        { {square, 4,  "B",  3},
-          {square, 2,  "C+", 4},
-          {square, 2,  "E",  4},
-          {square, 4,  "F+", 4},
-          {square, 4,  "G+", 4},
+    // TODO: add rests
+    // TODO: add persistent octave/length settings
+    std::string str_in =                                 "\
+    square:                                             \n\
+        4b3 2c+4 2E4 4f+4 4g+4 | 16G+4                  \n\
+        4b3 2c+4 2e4 4f+4 4g+4 | 6g+4 2f+4 4f+4 2b3 2b3 \n\
+    saw:                                                \n\
+        4b2 4e3      4f+3 4g+3 | 4b3 4c+4  4E4  4F+4    \n\
+        4e4 4c+4     4b3  4g+3 | 4e3 4c+3  4b2  4a2     \n\
+    sine:                                               \n\
+        8e2          8b2       | 8c+2      8g+2         \n\
+        8a2          8g+2      | 8F+2      8b2          \n\
+    ";
 
-          {square, 16, "G+", 4},
+    std::regex rgx_delim("[\\s|\\|]+");
+    std::regex rgx_note("(\\d+)([A-Ga-g][+-]?)(\\d+)");
+    std::smatch matches;
+    std::vector<note_t> stave;
+    std::vector<std::vector<note_t>> score;
 
-          {square, 4,  "B",  3},
-          {square, 2,  "C+", 4},
-          {square, 2,  "E",  4},
-          {square, 4,  "F+", 4},
-          {square, 4,  "G+", 4},
+    std::sregex_token_iterator iter(str_in.begin(), str_in.end(), rgx_delim, -1);
+    std::sregex_token_iterator end;
 
-          {square, 6,  "G+", 4},
-          {square, 2,  "F+", 4},
-          {square, 4,  "F+", 4},
-          {square, 2,  "B",  3},
-          {square, 2,  "B",  3},
-        },
+    shape_t s;
 
-        // stave 2
-        { {saw, 4,  "B",  2},
-          {saw, 4,  "E",  3},
-          {saw, 4,  "F+", 3},
-          {saw, 4,  "G+", 3},
-
-          {saw, 4,  "B",  3},
-          {saw, 4,  "C+", 4},
-          {saw, 4,  "E",  4},
-          {saw, 4,  "F+", 4},
-
-          {saw, 4,  "E",  4},
-          {saw, 4,  "C+", 4}, // overlaps with C+ in stave 1, sounds a bit weird
-          {saw, 4,  "B",  3},
-          {saw, 4,  "G+", 3},
-
-          {saw, 4,  "E",  3},
-          {saw, 4,  "C+", 3},
-          {saw, 4,  "B",  2},
-          {saw, 4,  "A",  2},
-        },
-
-        // stave 3
-        { {sine, 8, "E",  2},
-          {sine, 8, "B",  2},
-
-          {sine, 8, "C+", 2},
-          {sine, 8, "G+", 2},
-
-          {sine, 8, "A",  2},
-          {sine, 8, "G+", 2},
-
-          {sine, 8, "F+", 2},
-          {sine, 8, "B",  2},
+    for (; iter != end; ++iter) {
+        std::string token = *iter;
+        if (token.back() == ':') {
+            if (token == "sine:") {
+                s = sine;
+            } else if (token == "square:") {
+                s = square;
+            } else if (token == "triangle:") {
+                s = triangle;
+            } else if (token == "saw:") {
+                s = saw;
+            }
+            if (!stave.empty()) {
+                score.push_back(stave);
+                stave.clear();
+            }
+        } else {
+            if (std::regex_match(token, matches, rgx_note)) {
+                const unsigned int l = std::stoi(matches[1]);
+                std::string        n = matches[2];
+                const int          o = std::stoi(matches[3]);
+                for (auto &c: n) {
+                    c = std::toupper(c);
+                }
+                stave.push_back({s, l, n, o});
+            }
         }
-    };
+    }
+    if (!stave.empty()) {
+        score.push_back(stave);
+        stave.clear();
+    }
+    std::cout << score;
 
     // data_size depends on length of first stave
     // NOTE: dangerous if first stave isn't the longest. fix
