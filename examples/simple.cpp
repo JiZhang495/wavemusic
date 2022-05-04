@@ -16,8 +16,8 @@
 typedef struct Wav_Header wav_hdr_t;
 enum shape_t: uint8_t;
 class note_t;
-void play(std::fstream &f, uint32_t &data_size, note_t note, bool first);
-void play(std::fstream &f, uint32_t &data_size, shape_t shape,
+void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, note_t note, bool first);
+void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
           unsigned int length, float freq, int octave, bool first);
 float filter(int i, unsigned int s_len);
 
@@ -92,12 +92,12 @@ float filter(int i, unsigned int s_len) {
 }
 
 // write one note with note_t
-void play(std::fstream &f, uint32_t &data_size, note_t note, bool first) {
-    play(f, data_size, note.shape, note.length, note.freq, note.octave, first);
+void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, note_t note, bool first) {
+    play(pcm_data, ptr, note.shape, note.length, note.freq, note.octave, first);
 }
 
 // write one note with note parameters
-void play(std::fstream &f, uint32_t &data_size, shape_t shape,
+void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
           unsigned int length, float freq = 0.0, int octave = 4, bool first = false) {
 
     assert(length != 0);
@@ -107,7 +107,6 @@ void play(std::fstream &f, uint32_t &data_size, shape_t shape,
     float wave;
     float gain;
     int16_t pcm_out;
-    int16_t pcm_in;
     static float smqvr = 15.0/BPM;
     unsigned int s_len = rint(smqvr*length*S_RATE); // length in number of samples
 
@@ -135,6 +134,7 @@ void play(std::fstream &f, uint32_t &data_size, shape_t shape,
             break;
     }
 
+    assert(first || ((ptr + s_len - 1) < pcm_data.size()));
     for (unsigned int i = 0; i < s_len; ++i) {
         switch (shape) {
             case none:
@@ -179,15 +179,12 @@ void play(std::fstream &f, uint32_t &data_size, shape_t shape,
 
         pcm_out = gain * wave;
         if (first) {
-            f.write(reinterpret_cast<char *>(&pcm_out), sizeof(uint16_t));
-            data_size += sizeof(uint16_t);
+            pcm_data.push_back(pcm_out);
         } else {
-            f.read(reinterpret_cast<char *>(&pcm_in), sizeof(uint16_t));
-            f.seekp(-sizeof(uint16_t), std::ios::cur);
-            pcm_out += pcm_in;
-            f.write(reinterpret_cast<char *>(&pcm_out), sizeof(uint16_t));
+            pcm_data[ptr + i] += pcm_out;
         }
     }
+    ptr += s_len;
 }
 
 int main(void) {
@@ -195,10 +192,12 @@ int main(void) {
 
     // write file
     wav_hdr_t wav_hdr;
-    uint32_t data_size = 0;
+    uint32_t data_size;
+    std::vector<uint16_t> pcm_data;
+    unsigned int ptr;
 
-    std::fstream f;
-    f.open("m.wav", std::ios::in | std::ios::out | std::ios::binary);
+    std::ofstream f;
+    f.open("m.wav", std::ios::binary);
     f.write(reinterpret_cast<const char *>(&wav_hdr), sizeof(wav_hdr_t));
 
     std::vector<std::vector<note_t>> score = {
@@ -262,17 +261,20 @@ int main(void) {
     };
 
     // data_size depends on length of first stave
-    // NOTE: buggy output if first stave isn't the longest. fix?
-    // TODO: requires repeated reading and writing over the same file, slow
-    //       not sure how to fix except for writing everything into memory first
+    // NOTE: dangerous if first stave isn't the longest. fix
     bool first = true;
     for (const auto &stave: score) {
         for (const auto &note: stave) {
-            play(f, data_size, note, first);
+            play(pcm_data, ptr, note, first);
         }
         first = false;
-        f.seekp(sizeof(wav_hdr_t));
+        ptr = 0;
     }
+
+    for (const auto &sample: pcm_data) {
+        f.write(reinterpret_cast<const char *>(&sample), sizeof(uint16_t));
+    }
+    data_size = pcm_data.size() * sizeof(uint16_t);
 
     // calculate header and overwrite with correct size bits
     wav_hdr.data_size = data_size;
@@ -283,3 +285,4 @@ int main(void) {
 
     return 0;
 }
+
