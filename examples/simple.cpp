@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <string>
 #include <unordered_map>
@@ -79,9 +80,22 @@ public:
 };
 
 // debug code, use if DEBUG in the future
+std::ostream &operator<<(std::ostream& os, shape_t shape) {
+    switch (shape) {
+        case none:     return os << "rest";
+        case sine:     return os << "sine" ;
+        case square:   return os << "square";
+        case triangle: return os << "triangle";
+        case saw:      return os << "saw";
+    };
+}
+
 std::ostream &operator<<(std::ostream &os, note_t const &note) {
-    os << note.shape << " " << note.length << " " << note.name << " "
-       << note.freq << " " << note.octave << std::endl;
+    os << std::setw(8) << note.shape
+       << std::setw(3) << note.length << ' '
+       << std::left << std::setw(2) << note.name << std::right
+       << std::setw(7) << std::fixed << std::setprecision(1) << note.freq
+       << std::setw(2) << note.octave << std::endl;
     return os;
 }
 
