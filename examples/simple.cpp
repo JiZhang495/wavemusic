@@ -14,15 +14,6 @@
 #define SQR_AMP 2000
 #define SAW_AMP 3000
 
-// Forward declarations
-typedef struct Wav_Header wav_hdr_t;
-enum shape_t: uint8_t;
-class note_t;
-void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, note_t note, bool first);
-void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
-          unsigned int length, float freq, int octave, bool first);
-float filter(int i, unsigned int s_len);
-
 typedef struct Wav_Header {
     uint8_t  riff[4]       = {'R', 'I', 'F', 'F'};
     uint32_t file_size     = 0;                  // calculate and fill in later
@@ -68,14 +59,13 @@ public:
     int          octave;
     float        freq;
 
-
-    note_t(shape_t s, unsigned int l, std::string n = "X", int o = 0) {
+    note_t(shape_t s, unsigned int l, std::string n, int o) {
         static f_lut_t f_lut = construct_lut();
         shape  = s;
         length = l;
         name   = n;
         octave = o;
-        freq   = f_lut[n];
+        freq   = f_lut[n] * pow(2.0, octave-4);
     }
 };
 
@@ -88,6 +78,7 @@ std::ostream &operator<<(std::ostream& os, shape_t shape) {
         case triangle: return os << "triangle";
         case saw:      return os << "saw";
     };
+    return os << "error";
 }
 
 std::ostream &operator<<(std::ostream &os, note_t const &note) {
@@ -114,22 +105,23 @@ std::ostream &operator<<(std::ostream &os, std::vector<std::vector<note_t>> cons
     return os;
 }
 
-float filter(int i, unsigned int s_len) {
-    // assume 99% volume reduction by 0.02s
+float filter(unsigned int i, unsigned int s_len) {
+    // assume 99% volume change by 0.02s
     // k = -0.02/ln(0.01) = 0.004343
     static float k = -(0.02*S_RATE/log(0.01));
-    static int atk_start  = 0.02*S_RATE;
+    static unsigned int atk_start  = 0.02*S_RATE;
     assert(s_len > 2*atk_start);
-    int rel_start = s_len - atk_start;
+    unsigned int rel_start = s_len - atk_start;
+    int j = i; // cast to signed int
     float gain;
     if (i < atk_start) {
         // attack curve
         // y = 1 - e^(-t/k)
-        gain = 1.0-exp(-i/k);
+        gain = 1.0-exp(-j/k);
     } else if (i > rel_start) {
         // release curve in seconds
         // y = e^(-(t-0.02)/k)
-        gain = exp((rel_start-i)/k);
+        gain = exp((rel_start-j)/k);
     } else {
         // flat sustain
         gain = 1.0;
@@ -137,19 +129,13 @@ float filter(int i, unsigned int s_len) {
     return gain;
 }
 
-// write one note with note_t
-void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, note_t note, bool first) {
-    play(pcm_data, ptr, note.shape, note.length, note.freq, note.octave, first);
-}
-
 // write one note with note parameters
 void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
-          unsigned int length, float freq = 0.0, int octave = 4, bool first = false) {
+          unsigned int length, float freq, int octave, bool first) {
 
     assert(length != 0);
     if (shape != none) { assert(freq != 0.0 && octave != 0); }
 
-    freq = freq * pow(2.0, octave-4);
     float wave;
     float gain;
     int16_t pcm_out;
@@ -220,7 +206,7 @@ void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
         if (shape == none) {
             gain = 0;
         } else {
-            gain = filter((int)i, s_len);
+            gain = filter(i, s_len);
         }
 
         pcm_out = gain * wave;
@@ -232,6 +218,12 @@ void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
     }
     ptr += s_len;
 }
+
+// write one note with note_t
+void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, note_t note, bool first) {
+    play(pcm_data, ptr, note.shape, note.length, note.freq, note.octave, first);
+}
+
 
 int main(void) {
     static_assert(sizeof(wav_hdr_t) == 44, "wav_hdr_t size error");
@@ -246,22 +238,26 @@ int main(void) {
     f.open("m.wav", std::ios::binary);
     f.write(reinterpret_cast<const char *>(&wav_hdr), sizeof(wav_hdr_t));
 
-    // TODO: add rests
-    // TODO: add persistent octave/length settings
+    // No guards against these bad inputs, won't fix just git gud plz
+    //   - first note without octave value
+    //   - invalid instrument/note name
+    //   - first stave not longest
+    //   - bad barline positions (parser ignores barlines)
+    // TODO: add persistent length settings
     std::string str_in =                                 "\
     square:                                             \n\
-        4b3 2c+4 2E4 4f+4 4g+4 | 16G+4                  \n\
-        4b3 2c+4 2e4 4f+4 4g+4 | 6g+4 2f+4 4f+4 2b3 2b3 \n\
+        4b3 2c+4 2E 4f+ 4g+    | 16G+4                  \n\
+        4b3 2c+4 2e 4f+ 4g+    | 6g+ 2f+ 4f+ 2b3 2b     \n\
     saw:                                                \n\
-        4b2 4e3      4f+3 4g+3 | 4b3 4c+4  4E4  4F+4    \n\
-        4e4 4c+4     4b3  4g+3 | 4e3 4c+3  4b2  4a2     \n\
+        4b2 4e3      4f+3 4g+3 | 4b3 4c+4  4E   4F+     \n\
+        4e4 2r  2c+4 4b3  4g+  | 4e3 4c+3  4b2  4a2     \n\
     sine:                                               \n\
-        8e2          8b2       | 8c+2      8g+2         \n\
-        8a2          8g+2      | 8F+2      8b2          \n\
+        8e2          8b        | 8c+3      8g+2         \n\
+        8a2          8g+       | 8F+2      8b2          \n\
     ";
 
     std::regex rgx_delim("[\\s|\\|]+");
-    std::regex rgx_note("(\\d+)([A-Ga-g][+-]?)(\\d+)");
+    std::regex rgx_note("(\\d+)([A-Ga-gRr][+-]?)(\\d+)?");
     std::smatch matches;
     std::vector<note_t> stave;
     std::vector<std::vector<note_t>> score;
@@ -270,9 +266,13 @@ int main(void) {
     std::sregex_token_iterator end;
 
     shape_t s;
+    unsigned int l;
+    std::string n;
+    int o;
 
     for (; iter != end; ++iter) {
         std::string token = *iter;
+        // instrument headers
         if (token.back() == ':') {
             if (token == "sine:") {
                 s = sine;
@@ -287,13 +287,24 @@ int main(void) {
                 score.push_back(stave);
                 stave.clear();
             }
+        // notes
         } else {
             if (std::regex_match(token, matches, rgx_note)) {
-                const unsigned int l = std::stoi(matches[1]);
-                std::string        n = matches[2];
-                const int          o = std::stoi(matches[3]);
+                l = std::stoi(matches[1]);
+                n = matches[2];
                 for (auto &c: n) {
                     c = std::toupper(c);
+                }
+                // why cannot use .empty()?
+                if (matches[3] == "") {
+                    // rests
+                    if (matches[2] == "r") {
+                        stave.push_back({none, l, n, 0});
+                        continue;
+                    }
+                    // keep octave
+                } else {
+                    o = std::stoi(matches[3]);
                 }
                 stave.push_back({s, l, n, o});
             }
@@ -306,7 +317,6 @@ int main(void) {
     std::cout << score;
 
     // data_size depends on length of first stave
-    // NOTE: dangerous if first stave isn't the longest. fix
     bool first = true;
     for (const auto &stave: score) {
         for (const auto &note: stave) {
