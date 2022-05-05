@@ -114,21 +114,25 @@ std::ostream &operator<<(std::ostream &os, std::vector<std::vector<note_t>> cons
     return os;
 }
 
-// TODO: separate sustain section where gain = 1 to avoid exp calculation at every sample
 float filter(int i, unsigned int s_len) {
     // assume 99% volume reduction by 0.02s
     // k = -0.02/ln(0.01) = 0.004343
     static float k = -(0.02*S_RATE/log(0.01));
-    int rel_start = s_len - (int)(0.02*S_RATE);
+    static int atk_start  = 0.02*S_RATE;
+    assert(s_len > 2*atk_start);
+    int rel_start = s_len - atk_start;
     float gain;
-    if (i > rel_start) {
+    if (i < atk_start) {
+        // attack curve
+        // y = 1 - e^(-t/k)
+        gain = 1.0-exp(-i/k);
+    } else if (i > rel_start) {
         // release curve in seconds
         // y = e^(-(t-0.02)/k)
         gain = exp((rel_start-i)/k);
     } else {
-        // attack and sustain curve
-        // y = 1 - e^(-t/k)
-        gain = 1.0-exp(-i/k);
+        // flat sustain
+        gain = 1.0;
     }
     return gain;
 }
