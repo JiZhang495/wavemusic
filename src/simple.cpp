@@ -44,8 +44,8 @@ private:
             {"E-",  -6}, {"E", -5}, {"E+", -4},
             {"F-",  -5}, {"F", -4}, {"F+", -3},
             {"G-",  -3}, {"G", -2}, {"G+", -1},
-            {"A-",  -1}, {"A",  0}, {"A+", 1},
-            {"B-",   1}, {"B",  2}, {"B+", 3},
+            {"A-",  -1}, {"A",  0}, {"A+",  1},
+            {"B-",   1}, {"B",  2}, {"B+",  3},
         };
 
         for (auto &i: f_lut) { i.second = 440.0 * pow(2.0, i.second/12); }
@@ -138,7 +138,7 @@ void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
     assert(length != 0);
     if (shape != none) { assert(freq != 0.0 && octave != 0); }
 
-    float wave;
+    float wave = 0.0; // can remove this initialisation after trig wave done
     float gain;
     int16_t pcm_out;
     static float smqvr = 15.0/BPM;
@@ -267,10 +267,10 @@ int main(void) {
     std::sregex_token_iterator iter(str_in.begin(), str_in.end(), rgx_delim, -1);
     std::sregex_token_iterator end;
 
-    shape_t s;
+    shape_t s = none;
     unsigned int l;
     std::string n;
-    int o;
+    int o = 4;
 
     for (; iter != end; ++iter) {
         std::string token = *iter;
@@ -343,11 +343,25 @@ int main(void) {
     f.close();
 
     // play wav with system call
+    bool played = false;
+    int rvalue = -1;
     #ifdef __APPLE__
-    // system("afplay " FILE_NAME " &");
-    #elif
-    std::cout << "unsupported OS, please manually start playback of m.wav" << std::endl;
+    rvalue = system("afplay " FILE_NAME " &");
+    if(rvalue == 0) { played = true; }
+
+    #elif __linux__
+    // check if aplay exists
+    rvalue = system("command -v aplay > /dev/null");
+    if (rvalue == 0) {
+        rvalue = system("aplay " FILE_NAME " &");
+        if(rvalue == 0) { played = true; }
+    }
+
     #endif
+
+    if (!played) {
+        std::cout << "unsupported OS, please manually start playback of m.wav" << std::endl;
+    }
 
     return 0;
 }
