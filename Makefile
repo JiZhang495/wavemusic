@@ -10,7 +10,7 @@ endif
 refresh: clean simple
 
 simple: simple.o sigen.o
-	$(CXX) simple.o sigen.o -o simple
+	$(CXX) $(CXXFLAGS) simple.o sigen.o -o simple
 
 simple.o: src/simple.cpp
 	$(CXX) $(CXXFLAGS) -c src/simple.cpp -o simple.o
