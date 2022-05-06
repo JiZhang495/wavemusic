@@ -15,6 +15,12 @@ make simple
 ./simple
 ```
 
+for debug mode:
+```
+make refresh DEBUG=1
+./simple
+```
+
 ----
 The *playsound* module can be used to play the WAV file generated. Run the following command to install it:
 ```
