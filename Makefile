@@ -1,8 +1,15 @@
 CXX = g++
-CXXFLAGS = -g -Wall -Wextra -Werror -std=c++11
+CXXFLAGS = -Wall -Wextra -Werror -std=c++11
 
-all: src/simple.cpp
-	$(CXX) $(CXXFLAGS) src/simple.cpp -o simple
+.PHONY: all clean
+
+all: simple dsimple
+
+simple: src/simple.cpp
+	$(CXX) $(CXXFLAGS) -O2 src/simple.cpp -o simple
+
+dsimple: src/simple.cpp
+	$(CXX) $(CXXFLAGS) -D DEBUG src/simple.cpp -o dsimple
 
 clean:
-	rm -f simple simple.o m.wav
+	rm -f simple dsimple simple.o m.wav

@@ -13,6 +13,7 @@
 #define SIN_AMP 6000
 #define SQR_AMP 2000
 #define SAW_AMP 3000
+#define FILE_NAME "m.wav"
 
 typedef struct Wav_Header {
     uint8_t  riff[4]       = {'R', 'I', 'F', 'F'};
@@ -69,7 +70,7 @@ public:
     }
 };
 
-// debug code, use if DEBUG in the future
+#ifdef DEBUG
 std::ostream &operator<<(std::ostream& os, shape_t shape) {
     switch (shape) {
         case none:     return os << "rest";
@@ -104,6 +105,7 @@ std::ostream &operator<<(std::ostream &os, std::vector<std::vector<note_t>> cons
     }
     return os;
 }
+#endif
 
 float filter(unsigned int i, unsigned int s_len) {
     // assume 99% volume change by 0.02s
@@ -235,7 +237,7 @@ int main(void) {
     unsigned int ptr;
 
     std::ofstream f;
-    f.open("m.wav", std::ios::binary);
+    f.open(FILE_NAME, std::ios::binary);
     f.write(reinterpret_cast<const char *>(&wav_hdr), sizeof(wav_hdr_t));
 
     // No guards against these bad inputs, won't fix just git gud plz
@@ -314,7 +316,9 @@ int main(void) {
         score.push_back(stave);
         stave.clear();
     }
+    #ifdef DEBUG
     std::cout << score;
+    #endif
 
     // data_size depends on length of first stave
     bool first = true;
@@ -337,6 +341,13 @@ int main(void) {
     f.seekp(0);
     f.write(reinterpret_cast<const char *>(&wav_hdr), sizeof(wav_hdr_t));
     f.close();
+
+    // play wav with system call
+    #ifdef __APPLE__
+    // system("afplay " FILE_NAME " &");
+    #elif
+    std::cout << "unsupported OS, please manually start playback of m.wav" << std::endl;
+    #endif
 
     return 0;
 }
