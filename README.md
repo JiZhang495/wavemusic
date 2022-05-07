@@ -13,12 +13,16 @@ We can write some music with this module. We also intend to write music from wav
 To use the C++ version:
 ```
 make simple
+```
+```
 ./simple src/<title>.wmusic
 ```
 
 for debug mode:
 ```
 make refresh DEBUG=1
+```
+```
 ./simple src/<title>.wmusic
 ```
 
