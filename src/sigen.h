@@ -8,9 +8,9 @@
 
 #define S_RATE 44100
 #define BPM 100
-#define SIN_AMP 6000
+#define SIN_AMP 2828
 #define SQR_AMP 2000
-#define SAW_AMP 3000
+#define SAW_AMP 3464
 
 enum shape_t: uint8_t {none, sine, square, triangle, saw};
 typedef std::unordered_map<std::string, float> f_lut_t;
@@ -40,6 +40,6 @@ std::ostream &operator<<(std::ostream &os, std::vector<std::vector<note_t>> cons
 float filter(unsigned int i, unsigned int s_len);
 void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, note_t note, bool first);
 void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
-          unsigned int length, float freq, int octave, bool first);
+          unsigned int length, float freq, bool first);
 
 #endif

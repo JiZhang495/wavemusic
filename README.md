@@ -37,7 +37,6 @@ The *simpler.py* script is an alternative version of *simplest.py*, and *simple.
 
 TODO list:
 
- - [ ] consistent note length
+ - [x] consistent note length
  - [ ] functional REPL
  - [ ] triangle wave generation
-

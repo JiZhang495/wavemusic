@@ -1,13 +1,17 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
+#ifdef DEBUG
 #include <cassert>
+#endif
 #include <vector>
 #include <regex>
 
 #include "sigen.h"
 
 #define FILE_NAME "m.wav"
+#define SCORE_NAME "src/twsxxn.wmusic"
 
 typedef struct Wav_Header {
     uint8_t  riff[4]       = {'R', 'I', 'F', 'F'};
@@ -25,39 +29,12 @@ typedef struct Wav_Header {
     uint32_t data_size     = 0;                  // calculate and fill in later
 } wav_hdr_t;
 
-int main(void) {
-    static_assert(sizeof(wav_hdr_t) == 44, "wav_hdr_t size error");
+typedef std::vector<std::vector<note_t>> score_t;
 
-    // write file
-    wav_hdr_t wav_hdr;
-    uint32_t data_size;
-    std::vector<uint16_t> pcm_data;
-    unsigned int ptr;
-
-    std::ofstream f;
-    f.open(FILE_NAME, std::ios::binary);
-    f.write(reinterpret_cast<const char *>(&wav_hdr), sizeof(wav_hdr_t));
-
-    // No guards against these bad inputs, won't fix just git gud plz
-    //   - first note without octave value
-    //   - invalid instrument/note name
-    //   - first stave not longest
-    //   - bad barline positions (parser ignores barlines)
-    // TODO: add persistent length settings
-    std::string str_in =                                 "\
-    square:                                             \n\
-        4b3 2c+4 2E 4f+ 4g+    | 16G+4                  \n\
-        4b3 2c+4 2e 4f+ 4g+    | 6g+ 2f+ 4f+ 2b3 2b     \n\
-    saw:                                                \n\
-        4b2 4e3      4f+3 4g+3 | 4b3 4c+4  4E   4F+     \n\
-        4e4 2r  2c+4 4b3  4g+  | 4e3 4c+3  4b2  4a2     \n\
-    sine:                                               \n\
-        8e2          8b        | 8c+3      8g+2         \n\
-        8a2          8g+       | 8F+2      8b2          \n\
-    ";
-
+// parse input string to score_t
+score_t parse(std::string str_in) {
     std::regex rgx_delim("[\\s|\\|]+");
-    std::regex rgx_note("(\\d+)([A-Ga-gRr][+-]?)(\\d+)?");
+    std::regex rgx_note("(\\d+)?([A-Ga-gRr][+-]?)(\\d+)?");
     std::smatch matches;
     std::vector<note_t> stave;
     std::vector<std::vector<note_t>> score;
@@ -66,7 +43,7 @@ int main(void) {
     std::sregex_token_iterator end;
 
     shape_t s = none;
-    unsigned int l;
+    unsigned int l = 0;
     std::string n;
     int o = 4;
 
@@ -90,23 +67,20 @@ int main(void) {
         // notes
         } else {
             if (std::regex_match(token, matches, rgx_note)) {
-                l = std::stoi(matches[1]);
+                // note name, allow lower case
                 n = matches[2];
-                for (auto &c: n) {
-                    c = std::toupper(c);
-                }
-                // why cannot use .empty()?
-                if (matches[3] == "") {
-                    // rests
-                    if (matches[2] == "r") {
-                        stave.push_back({none, l, n, 0});
-                        continue;
-                    }
-                    // keep octave
+                for (auto &c: n) { c = std::toupper(c); }
+                // length
+                if (matches[1] != "") { l = std::stoi(matches[1]); }
+                // octave
+                if (matches[3] != "") { o = std::stoi(matches[3]); }
+
+                // rests
+                if (n == "R") {
+                    stave.push_back({none, l, n, o});
                 } else {
-                    o = std::stoi(matches[3]);
+                    stave.push_back({s, l, n, o});
                 }
-                stave.push_back({s, l, n, o});
             }
         }
     }
@@ -114,6 +88,39 @@ int main(void) {
         score.push_back(stave);
         stave.clear();
     }
+    return score;
+};
+
+int main(void) {
+    #ifdef DEBUG
+    static_assert(sizeof(wav_hdr_t) == 44, "wav_hdr_t size error");
+    #endif
+
+    // write file
+    wav_hdr_t wav_hdr;
+    uint32_t data_size;
+    std::vector<uint16_t> pcm_data;
+    unsigned int ptr;
+
+    std::ofstream f;
+    f.open(FILE_NAME, std::ios::binary);
+    f.write(reinterpret_cast<const char *>(&wav_hdr), sizeof(wav_hdr_t));
+
+    // Reads score
+    // No guards against these bad inputs, won't fix just git gud plz
+    //   - first note without octave value
+    //   - invalid instrument/note name
+    //   - first stave not longest
+    //   - bad barline positions (parser ignores barlines)
+    // TODO: add persistent length settings
+    std::ifstream f_score;
+    f_score.open(SCORE_NAME);
+    std::stringstream sstr_in;
+    sstr_in << f_score.rdbuf();
+    f_score.close();
+    std::string str_in = sstr_in.str();
+
+    score_t score = parse(str_in);
     #ifdef DEBUG
     std::cout << score;
     #endif

@@ -1,8 +1,8 @@
+#include <cmath>
 #ifdef DEBUG
 #include <iomanip>
-#endif
-#include <cmath>
 #include <cassert>
+#endif
 
 #include "sigen.h"
 
@@ -22,6 +22,7 @@ f_lut_t note_t::construct_lut() {
     return f_lut;
 }
 
+// TODO: remove octave from class and calculate frequency before construction?
 note_t::note_t(shape_t s, unsigned int l, std::string n, int o) {
     static f_lut_t f_lut = construct_lut();
     shape  = s;
@@ -36,7 +37,9 @@ float filter(unsigned int i, unsigned int s_len) {
     // k = -0.02/ln(0.01) = 0.004343
     static float k = -(0.02*S_RATE/log(0.01));
     static unsigned int atk_start  = 0.02*S_RATE;
+    #ifdef DEBUG
     assert(s_len > 2*atk_start);
+    #endif
     unsigned int rel_start = s_len - atk_start;
     int j = i; // cast to signed int
     float gain;
@@ -57,15 +60,17 @@ float filter(unsigned int i, unsigned int s_len) {
 
 // write one note with note_t
 void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, note_t note, bool first) {
-    play(pcm_data, ptr, note.shape, note.length, note.freq, note.octave, first);
+    play(pcm_data, ptr, note.shape, note.length, note.freq, first);
 }
 
 // write one note with note parameters
 void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
-          unsigned int length, float freq, int octave, bool first) {
+          unsigned int length, float freq, bool first) {
 
+    #ifdef DEBUG
     assert(length != 0);
-    if (shape != none) { assert(freq != 0.0 && octave != 0); }
+    if (shape != none) { assert(freq != 0.0); }
+    #endif
 
     float wave = 0.0; // can remove this initialisation after trig wave done
     float gain;
@@ -97,7 +102,9 @@ void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
             break;
     }
 
+    #ifdef DEBUG
     assert(first || ((ptr + s_len - 1) < pcm_data.size()));
+    #endif
     for (unsigned int i = 0; i < s_len; ++i) {
         switch (shape) {
             case none:
