@@ -11,7 +11,6 @@
 #include "sigen.h"
 
 #define FILE_NAME "m.wav"
-#define SCORE_NAME "src/twsxxn.wmusic"
 
 typedef struct Wav_Header {
     uint8_t  riff[4]       = {'R', 'I', 'F', 'F'};
@@ -91,7 +90,7 @@ score_t parse(std::string str_in) {
     return score;
 };
 
-int main(void) {
+int main(int argc, char **argv) {
     #ifdef DEBUG
     static_assert(sizeof(wav_hdr_t) == 44, "wav_hdr_t size error");
     #endif
@@ -113,8 +112,10 @@ int main(void) {
     //   - first stave not longest
     //   - bad barline positions (parser ignores barlines)
     // TODO: add persistent length settings
+    std::string score_filename = "src/twsxxn.wmusic";
+    if (argc > 1) { score_filename = argv[1]; };
     std::ifstream f_score;
-    f_score.open(SCORE_NAME);
+    f_score.open(score_filename);
     std::stringstream sstr_in;
     sstr_in << f_score.rdbuf();
     f_score.close();
