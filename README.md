@@ -11,18 +11,18 @@ We can write some music with this module. We also intend to write music from wav
 
 ----
 To use the C++ version:
-```
+```bash
 make simple
 ```
-```
+```bash
 ./simple src/<title>.wmusic
 ```
 
 for debug mode:
-```
+```bash
 make refresh DEBUG=1
 ```
-```
+```bash
 ./simple src/<title>.wmusic
 ```
 
