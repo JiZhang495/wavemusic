@@ -14,7 +14,7 @@
 #define TRI_AMP 3464
 #define SAW_AMP 3464
 // cut off frequency of LPF
-#define LPF_FC 12500
+#define LPF_FC 10000
 
 enum shape_t: uint8_t {none, sine, square, triangle, saw};
 typedef std::unordered_map<std::string, float> f_lut_t;
