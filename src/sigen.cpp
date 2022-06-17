@@ -49,8 +49,8 @@ float filter(unsigned int i, unsigned int s_len) {
         gain = 1.0-exp(-j/k);
     } else if (i > rel_start) {
         // release curve in seconds
-        // y = e^(-(t-0.02)/k)
-        gain = exp((rel_start-j)/k);
+        // y = e^(-((t-0.02)/k))
+        gain = exp(-((j-rel_start)/k));
     } else {
         // flat sustain
         gain = 1.0;
@@ -93,7 +93,10 @@ void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
             count = 0.0;
             break;
         case triangle:
-            // TODO
+            sign = true;
+            period = S_RATE/freq;
+            gradient = 2.0*(float)TRI_AMP/period;
+            count = 0.0;
             break;
         case saw:
             period = S_RATE/freq;
@@ -130,7 +133,16 @@ void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
                 break;
 
             case triangle:
-                // TODO
+                wave = count * gradient - TRI_AMP;
+                if (!sign) {
+                    wave = -wave;
+                }
+
+                count += 2.0;
+                if (count > period) {
+                    count = 0.0;
+                    sign = !sign;
+                }
                 break;
 
             case saw:

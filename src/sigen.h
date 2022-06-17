@@ -8,8 +8,10 @@
 
 #define S_RATE 44100
 #define BPM 100
+// Amplitudes defined for constant RMS
 #define SIN_AMP 2828
 #define SQR_AMP 2000
+#define TRI_AMP 3464
 #define SAW_AMP 3464
 
 enum shape_t: uint8_t {none, sine, square, triangle, saw};
