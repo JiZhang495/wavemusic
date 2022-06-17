@@ -2,12 +2,52 @@
 Writing music audio files using sine, square, triangular and sawtooth wave
 
 ----
-The *wave* module in the Python standard library provides a convenient interface to the WAV sound format.
-References:
-<https://docs.python.org/3/library/wave.html>
-<https://www.tutorialspoint.com/read-and-write-wav-files-using-python-wave>
 
-We can write some music with this module. We also intend to write music from waves with C++.
+Architecture of the C++ implementation
+```
+
+
+
+                                                                  main()
+                                                             ┌──────────────────────────────────────────────────────────┐
+                                                             │                                                          │
+                                                             │   Write WAV                                              │
+                                                             │   header                                                 │
+                                               sigen.cpp     │                                                          │
+                                                             │     │                                                    │
+┌──────────────────────────────────────────────────────────┐ │     ▼                                                    │
+│                                                          │ │                                                          │
+│ void play(std::vector<int16_t> &pcm_data,    Generate    │ │   Parse        score_t parse(std::string str_in)         │
+│           unsigned int &ptr, shape_t shape,  signals   ◄─┼─┼── score                                                  │
+│           unsigned int length, float freq,               │ │                                                          │
+│           bool first)                           │        │ │     │                                                    │
+│                                                 ▼        │ │     │                                                    │
+│                                                          │ │     │                                                    │
+│ float filter(unsigned int i,                 A/R filter  │ │     │                                                    │
+│              unsigned int s_len)                         │ │     │                                                    │
+│                                                 │        │ │     │                                                    │
+│                                                 ▼        │ │     ▼                                                    │
+│                                                          │ │                                                          │
+│ std::vector<int16_t>                         Low pass  ──┼─┼─► Write        void play(std::vector<int16_t> &pcm_data, │
+│   lowpass(std::vector<int16_t> &pcm_data)    filter      │ │   notes                  unsigned int &ptr, note_t note, │
+│                                                          │ │                          bool first);                    │
+└──────────────────────────────────────────────────────────┘ │     │                                                    │
+                                                             │     ▼                                                    │
+                                                             │                                                          │
+                                                             │   Fill in data size                                      │
+                                                             │   WAV header                                             │
+                                                             │                                                          │
+                                                             │     │                                                    │
+                                                             │     ▼                                                    │
+                                                             │                                                          │
+                                                             │   Playback                                               │
+                                                             │   with                                                   │
+                                                             │   system Call                                            │
+                                                             │                                                          │
+                                                             └──────────────────────────────────────────────────────────┘
+``````
+Write header -> 
+```
 
 ----
 To use the C++ version:
@@ -27,9 +67,22 @@ make refresh DEBUG=1
 ```
 
 ----
+The *wave* module in the Python standard library provides a convenient interface to the WAV sound format.
+References:
+<https://docs.python.org/3/library/wave.html>
+<https://www.tutorialspoint.com/read-and-write-wav-files-using-python-wave>
+
+We can write some music with this module. We also intend to write music from waves with C++.
+
+----
 The *playsound* module can be used to play the WAV file generated. Run the following command to install it:
-```
+```bash
 pip install playsound==1.2.2
+```
+
+Then to run the python script:
+```bash
+./simplest.py
 ```
 
 ----
