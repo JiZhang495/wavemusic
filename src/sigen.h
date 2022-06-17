@@ -13,6 +13,8 @@
 #define SQR_AMP 2000
 #define TRI_AMP 3464
 #define SAW_AMP 3464
+// cut off frequency of LPF
+#define LPF_FC 12500
 
 enum shape_t: uint8_t {none, sine, square, triangle, saw};
 typedef std::unordered_map<std::string, float> f_lut_t;
@@ -39,9 +41,10 @@ std::ostream &operator<<(std::ostream &os, std::vector<note_t> const &stave);
 std::ostream &operator<<(std::ostream &os, std::vector<std::vector<note_t>> const &score);
 #endif
 
+std::vector<int16_t> lowpass(std::vector<int16_t> &pcm_data);
 float filter(unsigned int i, unsigned int s_len);
-void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, note_t note, bool first);
-void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
+void play(std::vector<int16_t> &pcm_data, unsigned int &ptr, note_t note, bool first);
+void play(std::vector<int16_t> &pcm_data, unsigned int &ptr, shape_t shape,
           unsigned int length, float freq, bool first);
 
 #endif

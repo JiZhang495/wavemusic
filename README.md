@@ -45,5 +45,5 @@ TODO list:
  - [x] consistent note length
  - [ ] functional REPL
  - [x] triangle wave generation
- - [ ] polyphony sounds out of tune?
- - [ ] saw and square waves sounds bad, maybe add LPF to soften it
+ - [x] polyphony doesn't sound out of tune anymore?
+ - [x] saw and square waves sounds bad, add LPF to soften it

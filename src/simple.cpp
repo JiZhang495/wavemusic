@@ -98,7 +98,8 @@ int main(int argc, char **argv) {
     // write file
     wav_hdr_t wav_hdr;
     uint32_t data_size;
-    std::vector<uint16_t> pcm_data;
+    std::vector<int16_t> pcm_data;
+    std::vector<int16_t> pcm_out;
     unsigned int ptr;
 
     std::ofstream f;
@@ -136,10 +137,14 @@ int main(int argc, char **argv) {
         ptr = 0;
     }
 
-    for (const auto &sample: pcm_data) {
-        f.write(reinterpret_cast<const char *>(&sample), sizeof(uint16_t));
+    // apply a low pass filter
+    pcm_out = lowpass(pcm_data);
+
+    // TODO: change all pcm_data before this point to be float/doubles
+    for (const auto &sample: pcm_out) {
+        f.write(reinterpret_cast<const char *>(&sample), sizeof(int16_t));
     }
-    data_size = pcm_data.size() * sizeof(uint16_t);
+    data_size = pcm_out.size() * sizeof(int16_t);
 
     // calculate header and overwrite with correct size bits
     wav_hdr.data_size = data_size;

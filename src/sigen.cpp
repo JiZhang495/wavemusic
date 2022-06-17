@@ -32,6 +32,23 @@ note_t::note_t(shape_t s, unsigned int l, std::string n, int o) {
     freq   = f_lut[n] * pow(2.0, octave-4);
 }
 
+// TODO: pass in 2 data points instead of the whole piece if that's faster?
+std::vector<int16_t> lowpass(std::vector<int16_t> &pcm_data) {
+    std::vector<int16_t> pcm_out;
+    // time constant RC = 1/(2πf)
+    const float RC = 1/(2*M_PI*LPF_FC);
+    // smoothing factor α = dt/(RC+dt)
+    const float alpha = 1 / (RC*S_RATE + 1);
+    int16_t prev_out = 0;
+    // y[i] = α * x[i] + (1-α) * y[i-1]
+    for (const auto &sample: pcm_data) {
+        pcm_out.push_back((alpha * sample) + ((1-alpha) * prev_out));
+        prev_out = pcm_out.back();
+    }
+    return pcm_out;
+}
+
+// TODO: add decay and sustain and rename to ADSR
 float filter(unsigned int i, unsigned int s_len) {
     // assume 99% volume change by 0.02s
     // k = -0.02/ln(0.01) = 0.004343
@@ -59,12 +76,13 @@ float filter(unsigned int i, unsigned int s_len) {
 }
 
 // write one note with note_t
-void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, note_t note, bool first) {
+void play(std::vector<int16_t> &pcm_data, unsigned int &ptr, note_t note, bool first) {
     play(pcm_data, ptr, note.shape, note.length, note.freq, first);
 }
 
 // write one note with note parameters
-void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
+// signal generator -> attack/release gain filter -> output
+void play(std::vector<int16_t> &pcm_data, unsigned int &ptr, shape_t shape,
           unsigned int length, float freq, bool first) {
 
     #ifdef DEBUG
@@ -109,6 +127,7 @@ void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
     assert(first || ((ptr + s_len - 1) < pcm_data.size()));
     #endif
     for (unsigned int i = 0; i < s_len; ++i) {
+        // generate base signal
         switch (shape) {
             case none:
                 wave = 0;
@@ -153,12 +172,15 @@ void play(std::vector<uint16_t> &pcm_data, unsigned int &ptr, shape_t shape,
                 }
                 break;
         }
+
+        // apply attack/release filter
         if (shape == none) {
             gain = 0;
         } else {
             gain = filter(i, s_len);
         }
 
+        // write or overwrite data depending on if its first stave
         pcm_out = gain * wave;
         if (first) {
             pcm_data.push_back(pcm_out);
