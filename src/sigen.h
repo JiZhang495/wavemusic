@@ -26,12 +26,12 @@ private:
 
 public:
     shape_t      shape;
-    unsigned int length;
+    int          length;
     std::string  name;
     int          octave;
     float        freq;
 
-    note_t(shape_t s, unsigned int l, std::string n, int o);
+    note_t(shape_t s, int l, std::string n, int o);
 };
 
 #ifdef DEBUG
@@ -42,9 +42,9 @@ std::ostream &operator<<(std::ostream &os, std::vector<std::vector<note_t>> cons
 #endif
 
 std::vector<int16_t> lowpass(std::vector<int16_t> &pcm_data);
-float filter(unsigned int i, unsigned int s_len);
-void play(std::vector<int16_t> &pcm_data, unsigned int &ptr, note_t note, bool first);
-void play(std::vector<int16_t> &pcm_data, unsigned int &ptr, shape_t shape,
-          unsigned int length, float freq, bool first);
+float filter(int i, int s_len);
+void play(std::vector<int16_t> &pcm_data, int &ptr, note_t note, bool first);
+void play(std::vector<int16_t> &pcm_data, int &ptr, shape_t shape, int length,
+          float freq, bool first);
 
 #endif

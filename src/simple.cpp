@@ -42,7 +42,7 @@ score_t parse(std::string str_in) {
     std::sregex_token_iterator end;
 
     shape_t s = none;
-    unsigned int l = 0;
+    int l = 0;
     std::string n;
     int o = 4;
 
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
     uint32_t data_size;
     std::vector<int16_t> pcm_data;
     std::vector<int16_t> pcm_out;
-    unsigned int ptr;
+    int ptr;
 
     std::ofstream f;
     f.open(FILE_NAME, std::ios::binary);

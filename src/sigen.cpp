@@ -23,7 +23,7 @@ f_lut_t note_t::construct_lut() {
 }
 
 // TODO: remove octave from class and calculate frequency before construction?
-note_t::note_t(shape_t s, unsigned int l, std::string n, int o) {
+note_t::note_t(shape_t s, int l, std::string n, int o) {
     static f_lut_t f_lut = construct_lut();
     shape  = s;
     length = l;
@@ -49,15 +49,15 @@ std::vector<int16_t> lowpass(std::vector<int16_t> &pcm_data) {
 }
 
 // TODO: add decay and sustain and rename to ADSR
-float filter(unsigned int i, unsigned int s_len) {
+float filter(int i, int s_len) {
     // assume 99% volume change by 0.02s
     // k = -0.02/ln(0.01) = 0.004343
     static float k = -(0.02*S_RATE/log(0.01));
-    static unsigned int atk_start  = 0.02*S_RATE;
+    static int atk_start  = 0.02*S_RATE;
     #ifdef DEBUG
     assert(s_len > 2*atk_start);
     #endif
-    unsigned int rel_start = s_len - atk_start;
+    int rel_start = s_len - atk_start;
     int j = i; // cast to signed int
     float gain;
     if (i < atk_start) {
@@ -76,57 +76,34 @@ float filter(unsigned int i, unsigned int s_len) {
 }
 
 // write one note with note_t
-void play(std::vector<int16_t> &pcm_data, unsigned int &ptr, note_t note, bool first) {
+void play(std::vector<int16_t> &pcm_data, int &ptr, note_t note, bool first) {
     play(pcm_data, ptr, note.shape, note.length, note.freq, first);
 }
 
 // write one note with note parameters
 // signal generator -> attack/release gain filter -> output
-void play(std::vector<int16_t> &pcm_data, unsigned int &ptr, shape_t shape,
-          unsigned int length, float freq, bool first) {
+void play(std::vector<int16_t> &pcm_data, int &ptr, shape_t shape,
+          int length, float freq, bool first) {
 
     #ifdef DEBUG
     assert(length != 0);
     if (shape != none) { assert(freq != 0.0); }
     #endif
 
-    float wave = 0.0; // can remove this initialisation after trig wave done
+    float wave = 0.0;
     float gain;
     int16_t pcm_out;
     static float smqvr = 15.0/BPM;
-    unsigned int s_len = rint(smqvr*length*S_RATE); // length in number of samples
-
-    bool sign;
-    float period;
-    float count;
-    float gradient;
-    // initialise variables
-    switch (shape) {
-        case none:
-        case sine:
-            break;
-        case square:
-            sign = true;
-            period = S_RATE/freq/2.0;
-            count = 0.0;
-            break;
-        case triangle:
-            sign = true;
-            period = S_RATE/freq;
-            gradient = 2.0*(float)TRI_AMP/period;
-            count = 0.0;
-            break;
-        case saw:
-            period = S_RATE/freq;
-            gradient = 2.0*(float)SAW_AMP/period;
-            count = 0.0;
-            break;
-    }
+    int s_len      = rint(smqvr*length*S_RATE); // length in number of samples
+    bool sign      = true;
+    float period   = S_RATE/freq;
+    float gradient = 2.0/period;
+    float count    = 0.0;
 
     #ifdef DEBUG
     assert(first || ((ptr + s_len - 1) < pcm_data.size()));
     #endif
-    for (unsigned int i = 0; i < s_len; ++i) {
+    for (int i = 0; i < s_len; ++i) {
         // generate base signal
         switch (shape) {
             case none:
@@ -144,7 +121,7 @@ void play(std::vector<int16_t> &pcm_data, unsigned int &ptr, shape_t shape,
                     wave = -SQR_AMP;
                 }
 
-                count += 1.0;
+                count += 2.0;
                 if (count > period) {
                     count = 0.0;
                     sign = !sign;
@@ -152,7 +129,7 @@ void play(std::vector<int16_t> &pcm_data, unsigned int &ptr, shape_t shape,
                 break;
 
             case triangle:
-                wave = count * gradient - TRI_AMP;
+                wave = count * gradient * TRI_AMP - TRI_AMP;
                 if (!sign) {
                     wave = -wave;
                 }
@@ -165,7 +142,7 @@ void play(std::vector<int16_t> &pcm_data, unsigned int &ptr, shape_t shape,
                 break;
 
             case saw:
-                wave = count * gradient - SAW_AMP;
+                wave = count * gradient * SAW_AMP - SAW_AMP;
                 count += 1.0;
                 if (count > period) {
                     count = 0.0;

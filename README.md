@@ -8,43 +8,43 @@ Architecture of the C++ implementation
 
 
 
-                                                                  main()
-                                                             ┌──────────────────────────────────────────────────────────┐
-                                                             │                                                          │
-                                                             │   Write WAV                                              │
-                                                             │   header                                                 │
-                                               sigen.cpp     │                                                          │
-                                                             │     │                                                    │
-┌──────────────────────────────────────────────────────────┐ │     ▼                                                    │
-│                                                          │ │                                                          │
-│ void play(std::vector<int16_t> &pcm_data,    Generate    │ │   Parse        score_t parse(std::string str_in)         │
-│           unsigned int &ptr, shape_t shape,  signals   ◄─┼─┼── score                                                  │
-│           unsigned int length, float freq,               │ │                                                          │
-│           bool first)                           │        │ │     │                                                    │
-│                                                 ▼        │ │     │                                                    │
-│                                                          │ │     │                                                    │
-│ float filter(unsigned int i,                 A/R filter  │ │     │                                                    │
-│              unsigned int s_len)                         │ │     │                                                    │
-│                                                 │        │ │     │                                                    │
-│                                                 ▼        │ │     ▼                                                    │
-│                                                          │ │                                                          │
-│ std::vector<int16_t>                         Low pass  ──┼─┼─► Write        void play(std::vector<int16_t> &pcm_data, │
-│   lowpass(std::vector<int16_t> &pcm_data)    filter      │ │   notes                  unsigned int &ptr, note_t note, │
-│                                                          │ │                          bool first);                    │
-└──────────────────────────────────────────────────────────┘ │     │                                                    │
-                                                             │     ▼                                                    │
-                                                             │                                                          │
-                                                             │   Fill in data size                                      │
-                                                             │   WAV header                                             │
-                                                             │                                                          │
-                                                             │     │                                                    │
-                                                             │     ▼                                                    │
-                                                             │                                                          │
-                                                             │   Playback                                               │
-                                                             │   with                                                   │
-                                                             │   system Call                                            │
-                                                             │                                                          │
-                                                             └──────────────────────────────────────────────────────────┘
+                                  main()
+                             ┌──────────────────────────┐
+                             │                          │
+                             │   Write WAV              │
+                             │   header                 │
+               sigen.cpp     │                          │
+                             │     │                    │
+┌──────────────────────────┐ │     ▼                    │
+│                          │ │                          │
+│ play()       Generate    │ │   Parse        parse()   │
+│              signals   ◄─┼─┼── score                  │
+│                          │ │                          │
+│                 │        │ │     │                    │
+│                 ▼        │ │     │                    │
+│                          │ │     │                    │
+│ filter()     A/R filter  │ │     │                    │
+│                          │ │     │                    │
+│                 │        │ │     │                    │
+│                 ▼        │ │     ▼                    │
+│                          │ │                          │
+│ lowpass()    Low pass  ──┼─┼─► Write                  │
+│              filter      │ │   notes                  │
+│                          │ │                          │
+└──────────────────────────┘ │     │                    │
+                             │     ▼                    │
+                             │                          │
+                             │   Insert data size       │
+                             │   in WAV header          │
+                             │                          │
+                             │     │                    │
+                             │     ▼                    │
+                             │                          │
+                             │   Playback               │
+                             │   with                   │
+                             │   system Call            │
+                             │                          │
+                             └──────────────────────────┘
 ```
 
 ----
