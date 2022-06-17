@@ -45,8 +45,6 @@ Architecture of the C++ implementation
                                                              │   system Call                                            │
                                                              │                                                          │
                                                              └──────────────────────────────────────────────────────────┘
-``````
-Write header -> 
 ```
 
 ----
