@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
     //   - first stave not longest
     //   - bad barline positions (parser ignores barlines)
     // TODO: add persistent length settings
-    std::string score_filename = "src/twsxxn.wmusic";
+    std::string score_filename = "sheets/twsxxn.wmusic";
     if (argc > 1) { score_filename = argv[1]; };
     std::ifstream f_score;
     f_score.open(score_filename);

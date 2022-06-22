@@ -53,7 +53,7 @@ To use the C++ version:
 make simple
 ```
 ```bash
-./simple src/<title>.wmusic
+./simple sheets/<title>.wmusic
 ```
 
 for debug mode:
@@ -61,7 +61,7 @@ for debug mode:
 make refresh DEBUG=1
 ```
 ```bash
-./simple src/<title>.wmusic
+./simple sheets/<title>.wmusic
 ```
 
 ----
