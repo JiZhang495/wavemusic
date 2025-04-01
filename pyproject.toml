@@ -11,8 +11,9 @@ optional = [
     "playsound==1.2.2",
 ]
 
-[tools.uv]
+[tool.uv]
 dev-dependencies = [
+    "pytest>=8.3.5",
     "ruff>=0.11.2",
 ]
 
