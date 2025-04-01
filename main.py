@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from scripts.simpler import music
+from scripts.music import music
 
 def main():
     print("Hello from wavemusic!")
