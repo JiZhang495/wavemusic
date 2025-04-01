@@ -21,6 +21,11 @@ class Music:
         shape = "s"  # default shape
         for n in notelist:
             n = n.strip()
+            if n[-1] == ":": #signals waveform change (signalling another melody polyphony to be added)
+                if n == "sine:":
+                    shape = "s"
+                elif n == "square:":
+                    shape = "q"
             if n[0] in ["s", "q"]:
                 shape = n[0]
                 n = n[1:]

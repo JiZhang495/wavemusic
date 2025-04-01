@@ -65,7 +65,7 @@ class WaveMusicGUI:
 
     def load_score(self):
         file_path = filedialog.askopenfilename(
-            initialdir="sheets", defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
+            initialdir="sheets", defaultextension=".txt", filetypes=[("WaveMusic Files", "*.wmusic"), ("Text Files", "*.txt")])
         if file_path:
             try:
                 with open(file_path) as file:
@@ -77,7 +77,7 @@ class WaveMusicGUI:
     
     def save_score(self):
         file_path = filedialog.asksaveasfilename(
-            initialdir="sheets", defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
+            initialdir="sheets", defaultextension=".txt", filetypes=[("WaveMusic Files", "*.wmusic")])
         if file_path:
             try:
                 with open(file_path, 'w') as file:
