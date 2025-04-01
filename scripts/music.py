@@ -2,10 +2,10 @@ import wave
 import struct
 import os
 from sys import platform
-from scripts.note import note
+from scripts.note import Note
 # from playsound import playsound #if play_from_playsound() used
 
-class music:
+class Music:
     """ This class is used to represent a piece of music.
     It contains a list of notes and a method to play the music.
     """
@@ -25,7 +25,7 @@ class music:
             if n[0] in ["s", "q"]:
                 shape = n[0]
                 n = n[1:]
-            note_obj = note(shape=shape)
+            note_obj = Note(shape=shape)
             note_obj.update(n)
             self.notes.append(note_obj)
     
