@@ -22,9 +22,9 @@ class WaveMusicGUI:
         self.score_entry.pack(pady=10)
         self.score_entry.config(font=("Courier", 10))
         # example score
-        example_score = "r 2eb 2f 2g | 2bb 2g 3g r | f f 2eb 3f r | 2eb 2c 2eb 2f | 5g 3r | 2eb " \
-        "2c 3eb r | bb3 bb3 2f 3eb r | 2g 2f 2f 2eb | 4f q2eb 2f | 2bb 2g 3g r | f f 2eb 3f r | "\
-        "2eb 2c 2eb 2bb | 5g 3r | 2eb 2c 3eb r | bb3 bb3 2f 3eb r | 2g 2f 2eb 2c | 4eb"
+        example_score = "1r eb f g | bb g 3g 1r | 1f 1f eb 3f 1r | eb c eb f | 5g 3r | eb " \
+        "c 3eb 1r | 1bb3 1bb3 f 3eb 1r | g f f eb | 4f qeb f | bb g 3g 1r | 1f 1f eb 3f 1r | "\
+        "eb c eb bb | 5g 3r | eb c 3eb 1r | 1bb3 1bb3 f 3eb 1r | g f eb c | 4eb"
         self.score_entry.insert(tk.END, example_score)
 
         # Open file link to load score and save score

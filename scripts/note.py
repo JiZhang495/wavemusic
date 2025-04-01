@@ -9,7 +9,7 @@ class Note:
     "note" takes either the note name or frequency (Hz) of the note (feature to be added)
     "r" is used as the note name of rests
     """
-    def __init__(self, shape="s", length=1, name="r", octave=4):
+    def __init__(self, shape="s", length=2, name="r", octave=4):
         self.shape = shape
         self.length = length
         self.name = name
