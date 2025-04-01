@@ -4,7 +4,7 @@ from scripts.utils import (
     note_name_to_freq,
 )
 
-class note:
+class Note:
     """ "length" is measured as multiples of a semiquaver
     "note" takes either the note name or frequency (Hz) of the note (feature to be added)
     "r" is used as the note name of rests
@@ -42,7 +42,7 @@ class note:
         semiquaver = 15 / bpm #s
         frames = int(self.length * semiquaver * sample_rate)
         value = []
-        if self.frequency == None or self.name == "r":
+        if self.frequency is None or self.name == "r":
             for _i in range(frames):
                 value.append(0)
         else:

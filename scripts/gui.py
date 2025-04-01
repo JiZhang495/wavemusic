@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from scripts.music import music
+from scripts.music import Music
 
 class WaveMusicGUI:
     def __init__(self, root):
@@ -42,10 +42,11 @@ class WaveMusicGUI:
         self.play_button.pack(pady=5)
 
     def load_score(self):
-        file_path = filedialog.askopenfilename(initialdir="sheets", defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
+        file_path = filedialog.askopenfilename(
+            initialdir="sheets", defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
         if file_path:
             try:
-                with open(file_path, 'r') as file:
+                with open(file_path) as file:
                     score = file.read()
                     self.score_entry.delete(1.0, tk.END)
                     self.score_entry.insert(tk.END, score)
@@ -53,7 +54,8 @@ class WaveMusicGUI:
                 messagebox.showerror("Error", f"Failed to load file: {e}")#
     
     def save_score(self):
-        file_path = filedialog.asksaveasfilename(initialdir="sheets", defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
+        file_path = filedialog.asksaveasfilename(
+            initialdir="sheets", defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
         if file_path:
             try:
                 with open(file_path, 'w') as file:
@@ -68,7 +70,7 @@ class WaveMusicGUI:
             messagebox.showwarning("Warning", "Score is empty!")
             return
         try:
-            music(score).write_wav(filename="music.wav", sample_rate=44100, bpm=100)
+            Music(score).write_wav(filename="music.wav", sample_rate=44100, bpm=100)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to create WAV file: {e}")
         messagebox.showinfo("Info", "WAV file created successfully!")
@@ -79,7 +81,7 @@ class WaveMusicGUI:
             messagebox.showwarning("Warning", "Score is empty!")
             return   
         try:
-            music(score).playscore(filename="music.wav", sample_rate=44100, bpm=100)
+            Music(score).playscore(filename="music.wav", sample_rate=44100, bpm=100)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to create/play WAV file: {e}")
             return
