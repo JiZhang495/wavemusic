@@ -69,13 +69,11 @@ make refresh DEBUG=1
 The *wave* module in the Python standard library provides a convenient interface to the WAV sound format.
 References:
 <https://docs.python.org/3/library/wave.html>
-
 <https://www.tutorialspoint.com/read-and-write-wav-files-using-python-wave>
 
 The demo song is "Ting Wo Shuo Xie Xie Ni".
 We would like to add more features to the program to produce chords and more complicated melodies in the future.
 
-----
 The *playsound* module can be used to play the WAV file generated. Run the following command to install it:
 ```bash
 pip install playsound==1.2.2
