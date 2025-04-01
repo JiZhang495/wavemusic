@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from scripts.simpler import music
 
 def main():
