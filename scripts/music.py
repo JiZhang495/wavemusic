@@ -4,6 +4,7 @@ import struct
 import os
 from sys import platform
 from scripts.note import note
+# from playsound import playsound #if play_from_playsound() used
 
 class music:
     """ This class is used to represent a piece of music.
@@ -51,6 +52,10 @@ class music:
             os.system("start " + filename)
         else:
             print("unsupported platform:" + platform)
+
+    def play_from_playsound(self, filename="music.wav", sample_rate=44100, bpm=100):
+        self.write_wav(filename=filename, sample_rate=sample_rate, bpm=bpm)
+        # playsound(filename)
 
 
 if __name__ == "__main__":
