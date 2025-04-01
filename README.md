@@ -84,9 +84,6 @@ To use uv for dependency management:
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sudo sh
 ```
-```bash
-uv version
-```
 Sync Python version, set up .venv, sync dependencies from 'pyproject.toml':
 ```bash
 uv sync
