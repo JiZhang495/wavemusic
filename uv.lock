@@ -3,6 +3,14 @@ revision = 1
 requires-python = ">=3.12"
 
 [[package]]
+name = "playsound"
+version = "1.2.2"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f5/16/10d897b0a83fb4b05b03a63d7a2667ab75f857f67f7062fd447dd3f49bf7/playsound-1.2.2-py2.py3-none-any.whl", hash = "sha256:1e83750a5325cbccee03d6e751ba3e78c037ac95b95a3ba1f38d0c5aca9e1a34", size = 5960 },
+]
+
+[[package]]
 name = "ruff"
 version = "0.11.2"
 source = { registry = "https://pypi.org/simple" }
@@ -32,12 +40,19 @@ name = "wavemusic"
 version = "0.1.0"
 source = { virtual = "." }
 
+[package.optional-dependencies]
+optional = [
+    { name = "playsound" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "ruff" },
 ]
 
 [package.metadata]
+requires-dist = [{ name = "playsound", marker = "extra == 'optional'", specifier = "==1.2.2" }]
+provides-extras = ["optional"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "ruff", specifier = ">=0.11.2" }]

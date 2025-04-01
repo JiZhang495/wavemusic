@@ -74,15 +74,28 @@ References:
 The demo song is "Ting Wo Shuo Xie Xie Ni".
 We would like to add more features to the program to produce chords and more complicated melodies in the future.
 
-The *playsound* module can be used to play the WAV file generated. Run the following command to install it:
-```bash
-pip install playsound==1.2.2
-```
 
 To run the python script:
 ```bash
 ./main.py
 ```
+
+To use uv for dependency management:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sudo sh
+```
+```bash
+uv version
+```
+Sync Python version, set up .venv, sync dependencies from 'pyproject.toml':
+```bash
+uv sync
+```
+Run project:
+```bash
+uv run main.py
+```
+
 
 
 ----
