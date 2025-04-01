@@ -68,7 +68,7 @@ class music:
     It contains a list of notes and a method to play the music.
     """
     def __init__(self, score: str):
-        self.score = score
+        self.score = score.replace("|", "")
         self.notes = []
         self.score_to_notes()
     
@@ -87,10 +87,10 @@ class music:
             note_obj.update(n)
             self.notes.append(note_obj)
     
-    def write_wav(self, filename="music.wav", sample_rate=44100): #44100 Hz
+    def write_wav(self, filename="music.wav", sample_rate=44100, bpm=100): #44100 Hz
         rawdata = []
         for note_obj in self.notes:
-            rawdata.extend(note_obj.note_to_wave(sample_rate))
+            rawdata.extend(note_obj.note_to_wave(sample_rate=sample_rate, bpm=bpm))
 
         with wave.open(filename, "w") as f:
             f.setnchannels(1) # mono
@@ -98,25 +98,21 @@ class music:
             f.setframerate(sample_rate)
             for d in rawdata:
                 f.writeframesraw(struct.pack("<h", d))
-        
-        
-def simpler():
-    score = "r 2eb4 2f4 2g4 2bb4 2g4 3g4 r f4 f4 2eb4 3f4 r 2eb4 2c4 2eb4 2f4 5g4 3r 2eb4 " \
-    "2c4 3eb4 r bb3 bb3 2f4 3eb4 r 2g4 2f4 2f4 2eb4 4f4 q2eb 2f 2bb 2g 3g r f f 2eb 3f r "\
-    "2eb 2c 2eb 2bb 5g 3r 2eb 2c 3eb r bb3 bb3 2f 3eb r 2g 2f 2eb 2c 4eb"
-    music_obj = music(score)
-    filename = "music.wav"
-    music_obj.write_wav(filename=filename, sample_rate=44100)
-
-    if platform == "linux" or platform == "linux2":
-        os.system("aplay " + filename)
-    elif platform == "darwin":
-        os.system("afplay " + filename)
-    elif platform == "win32":
-        os.system("start " + filename)
-    else:
-        print("unsupported platform:" + platform)
+    
+    def playscore(self, filename="music.wav", sample_rate=44100, bpm=100):
+        self.write_wav(filename=filename, sample_rate=sample_rate, bpm=bpm)
+        if platform == "linux" or platform == "linux2":
+            os.system("aplay " + filename)
+        elif platform == "darwin":
+            os.system("afplay " + filename)
+        elif platform == "win32":
+            os.system("start " + filename)
+        else:
+            print("unsupported platform:" + platform)
 
 
 if __name__ == "__main__":
-    simpler()
+    score = "r 2eb 2f 2g | 2bb 2g 3g r | f f 2eb 3f r | 2eb 2c 2eb 2f | 5g 3r | 2eb " \
+    "2c 3eb r | bb3 bb3 2f 3eb r | 2g 2f 2f 2eb | 4f q2eb 2f | 2bb 2g 3g r | f f 2eb 3f r | "\
+    "2eb 2c 2eb 2bb | 5g 3r | 2eb 2c 3eb r | bb3 bb3 2f 3eb r | 2g 2f 2eb 2c | 4eb"
+    music(score).playscore(filename="music.wav", sample_rate=44100, bpm=100)
