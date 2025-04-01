@@ -70,8 +70,6 @@ References:
 <https://docs.python.org/3/library/wave.html>
 <https://www.tutorialspoint.com/read-and-write-wav-files-using-python-wave>
 
-We can write some music with this module. We also intend to write music from waves with C++.
-
 ----
 The *playsound* module can be used to play the WAV file generated. Run the following command to install it:
 ```bash
@@ -80,21 +78,28 @@ pip install playsound==1.2.2
 
 Then to run the python script:
 ```bash
-./simplest.py
+./main.py
 ```
 
 ----
-The *simplest.py* script in the *src* folder demonstrates creation of simple monophonic melodies with sine waves and square waves.
-The song is "Ting Wo Shuo Xie Xie Ni".
+The demo song is "Ting Wo Shuo Xie Xie Ni".
 We would like to add more features to the program to produce chords and more complicated melodies in the future.
-The *simpler.py* script is an alternative version of *simplest.py*, and *simple.cpp* demonstrates a way of doing it in C++.
 
 ----
+Python TODO list:
+ - [ ] add waveforms.py to store functions for each waveform
+ - [ ] the functions can be added to produce complex timber and polyphony
+ - [ ] add loudness: ff, f, fp, p, pp
+ - [ ] add dynamics: cresc, dim
+ - [ ] add timber
+ - [ ] GUI
+ - [ ] add polyphony (fugue)
 
-TODO list:
+C++ TODO list:
 
  - [x] consistent note length
  - [ ] functional REPL
  - [x] triangle wave generation
  - [x] polyphony doesn't sound out of tune anymore?
  - [x] saw and square waves sounds bad, add LPF to soften it
+
