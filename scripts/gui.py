@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from scripts.music import Music
+from playsound import playsound
+from scripts.utils import play_wav
 
 class WaveMusicGUI:
     def __init__(self, root):
@@ -25,21 +27,41 @@ class WaveMusicGUI:
         "2eb 2c 2eb 2bb | 5g 3r | 2eb 2c 3eb r | bb3 bb3 2f 3eb r | 2g 2f 2eb 2c | 4eb"
         self.score_entry.insert(tk.END, example_score)
 
-        # Open file link to load score
-        self.open_file_button = tk.Button(root, text="Load Score", command=self.load_score)
-        self.open_file_button.pack(pady=5)
+        # Open file link to load score and save score
+        self.file_buttons_frame = tk.Frame(root)
+        self.file_buttons_frame.pack(pady=5)
 
-        # Save score
-        self.save_file_button = tk.Button(root, text="Save Score", command=self.save_score)
-        self.save_file_button.pack(pady=5)
+        self.open_file_button = tk.Button(self.file_buttons_frame, text="Load Score", command=self.load_score)
+        self.open_file_button.pack(side=tk.LEFT, padx=5)
+
+        self.save_file_button = tk.Button(self.file_buttons_frame, text="Save Score", command=self.save_score)
+        self.save_file_button.pack(side=tk.LEFT, padx=5)
+
+        # Frame for filename entry and tickbox
+        self.playmusic_frame = tk.Frame(root)
+        self.playmusic_frame.pack(pady=5)
+
+        self.musicfile_frame = tk.Frame(self.playmusic_frame)
+        self.musicfile_frame.pack(side=tk.LEFT, padx=5)
+        self.musicfile_frame.config(width=200)
+
+        # entry box for filename, default is music.wav, get entry as a variable
+        self.filename = tk.StringVar()
+        self.filename.set("music.wav")
+        self.filename_entry = tk.Entry(self.musicfile_frame, textvariable=self.filename, width=20)
+        self.filename_entry.pack(side=tk.TOP, padx=5)
+
+        # tickbox for playing WAV
+        self.play_var = tk.BooleanVar()
+        self.play_var.set(True)  # default to checked
+        self.play_checkbutton = tk.Checkbutton(self.musicfile_frame, text="Play WAV after creation", variable=self.play_var)
+        self.play_checkbutton.pack(side=tk.TOP, padx=5)
+        self.play_checkbutton.config(font=("Arial", 9))
 
         # Button for creating WAV
-        self.create_wav_button = tk.Button(root, text="Create WAV", command=self.create_wav)
-        self.create_wav_button.pack(pady=5)
-
-        # Button for playing WAV
-        self.play_button = tk.Button(root, text="Create and Play WAV", command=self.play_wav)
-        self.play_button.pack(pady=5)
+        self.create_wav_button = tk.Button(self.playmusic_frame, text="Create WAV", command=self.create_wav, height=2, width=15)
+        self.create_wav_button.pack(side=tk.LEFT, padx=5)
+        self.create_wav_button.config(font=("Arial", 12))
 
     def load_score(self):
         file_path = filedialog.askopenfilename(
@@ -69,19 +91,24 @@ class WaveMusicGUI:
         if not score:
             messagebox.showwarning("Warning", "Score is empty!")
             return
+        if not self.filename.get():
+            messagebox.showwarning("Warning", "Filename is empty!")
+            return     
+        filename = self.filename.get()
+        if not filename.endswith(".wav"):
+            filename += ".wav"
+        # if os.path.exists(filename):
+        #     overwrite = messagebox.askyesno("Overwrite", f"{filename} already exists. Overwrite?")
+        #     if not overwrite:
+        #         return
         try:
-            Music(score).write_wav(filename="music.wav", sample_rate=44100, bpm=100)
+            Music(score).write_wav(filename=filename, sample_rate=44100, bpm=100)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to create WAV file: {e}")
-        messagebox.showinfo("Info", "WAV file created successfully!")
-
-    def play_wav(self):  
-        score = self.score_entry.get(1.0, tk.END).strip()
-        if not score:
-            messagebox.showwarning("Warning", "Score is empty!")
-            return   
-        try:
-            Music(score).playscore(filename="music.wav", sample_rate=44100, bpm=100)
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to create/play WAV file: {e}")
-            return
+        if self.play_var.get():
+            try:
+                play_wav(filename=filename)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to play WAV file: {e}")
+            # playsound(filename)
+        

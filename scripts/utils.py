@@ -1,3 +1,5 @@
+import os
+from sys import platform
 
 def is_integer(s):
     try:
@@ -27,3 +29,13 @@ def note_name_to_freq(name):
         "b": 2,
     }
     return map.get(name.lower(), None) # case insensitive, returns None if not found
+
+def play_wav(filename):
+    if platform == "linux" or platform == "linux2":
+        os.system("aplay " + filename)
+    elif platform == "darwin":
+        os.system("afplay " + filename)
+    elif platform == "win32":
+        os.system("start " + filename)
+    else:
+        print("unsupported platform:" + platform)

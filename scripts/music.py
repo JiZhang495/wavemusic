@@ -1,9 +1,8 @@
 import wave
 import struct
-import os
-from sys import platform
 from scripts.note import Note
-# from playsound import playsound #if play_from_playsound() used
+from scripts.utils import play_wav
+ps = None # placeholder for playsound import
 
 class Music:
     """ This class is used to represent a piece of music.
@@ -34,24 +33,24 @@ class Music:
         for note_obj in self.notes:
             rawdata.extend(note_obj.note_to_wave(sample_rate=sample_rate, bpm=bpm))
 
-        with wave.open(filename, "w") as f:
-            f.setnchannels(1) # mono
-            f.setsampwidth(2) # 2 bytes (16 bits)
+        with wave.open(filename, "wb") as f:
+            f.setnchannels(1)  # mono
+            f.setsampwidth(2)  # 2 bytes (16 bits)
             f.setframerate(sample_rate)
-            for d in rawdata:
-                f.writeframesraw(struct.pack("<h", d))
+            f.writeframes(struct.pack("<" + "h" * len(rawdata), *rawdata))
+            # for d in rawdata:
+            #     f.writeframesraw(struct.pack("<h", d))
     
     def playscore(self, filename="music.wav", sample_rate=44100, bpm=100):
         self.write_wav(filename=filename, sample_rate=sample_rate, bpm=bpm)
-        if platform == "linux" or platform == "linux2":
-            os.system("aplay " + filename)
-        elif platform == "darwin":
-            os.system("afplay " + filename)
-        elif platform == "win32":
-            os.system("start " + filename)
-        else:
-            print("unsupported platform:" + platform)
+        play_wav(filename=filename)
 
     def play_from_playsound(self, filename="music.wav", sample_rate=44100, bpm=100):
+        """ This method is used to play the music using playsound library after writing WAV.
+        """
+        global ps
+        if ps is None:
+            from playsound import playsound
+            ps = playsound
         self.write_wav(filename=filename, sample_rate=sample_rate, bpm=bpm)
-        # playsound(filename)
+        ps(filename=filename)
