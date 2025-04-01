@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 from scripts.music import music
+import tkinter as tk
+from scripts.gui import WaveMusicGUI
 
 def main():
     print("Hello from wavemusic!")
@@ -8,5 +10,11 @@ def main():
     "2eb 2c 2eb 2bb | 5g 3r | 2eb 2c 3eb r | bb3 bb3 2f 3eb r | 2g 2f 2eb 2c | 4eb"
     music(score).playscore(filename="music.wav", sample_rate=44100, bpm=100)
 
+def main_gui():
+    root = tk.Tk()
+    app = WaveMusicGUI(root)
+    root.mainloop()
+
 if __name__ == "__main__":
-    main()
+    # main()
+    main_gui()

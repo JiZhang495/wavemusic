@@ -92,7 +92,7 @@ Python TODO list:
  - [ ] add loudness: ff, f, fp, p, pp
  - [ ] add dynamics: cresc, dim
  - [ ] add timber
- - [ ] GUI
+ - [x] GUI
  - [ ] add polyphony (fugue)
 
 C++ TODO list:
