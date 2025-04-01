@@ -105,7 +105,7 @@ def write(file, value):
         data = struct.pack("<h", d)
         file.writeframesraw(data)
 
-def main():
+def simpler():
     score = "r 2eb4 2f4 2g4 2bb4 2g4 3g4 r f4 f4 2eb4 3f4 r 2eb4 2c4 2eb4 2f4 5g4 3r 2eb4 " \
     "2c4 3eb4 r bb3 bb3 2f4 3eb4 r 2g4 2f4 2f4 2eb4 4f4 q2eb 2f 2bb 2g 3g r f f 2eb 3f r "\
     "2eb 2c 2eb 2bb 5g 3r 2eb 2c 3eb r bb3 bb3 2f 3eb r 2g 2f 2eb 2c 4eb"
@@ -136,4 +136,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    simpler()
