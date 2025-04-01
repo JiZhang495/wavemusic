@@ -1,37 +1,13 @@
 #!/usr/bin/env python3
-
-import wave, struct, math, os
+import wave
+import struct
+import math
+import os
 from sys import platform
-
-
-def is_integer(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
-    
-def note_name_to_freq(name):
-    map = {
-        "c": -9,
-        "cs": -8,
-        "db": -8,
-        "d": -7,
-        "ds": -6,
-        "eb": -6,
-        "e": -5,
-        "f": -4,
-        "fs": -3,
-        "gb": -3,
-        "g": -2,
-        "gs": -1,
-        "ab": -1,
-        "a": 0,
-        "as": 1,
-        "bb": 1,
-        "b": 2,
-    }
-    return map.get(name.lower(), None) # case insensitive, returns None if not found
+from scripts.utils import (
+    is_integer, 
+    note_name_to_freq,
+)
 
 class note:
     """ "length" is measured as multiples of a semiquaver
@@ -86,44 +62,51 @@ class note:
                         value.append(2000)
         return value
 
-def score_to_notes(score: str):
-    notelist = score.split()
-    notes = []
-    shape = "s"  # default shape
-    for n in notelist:
-        n = n.strip()
-        if n[0] in ["s", "q"]:
-            shape = n[0]
-            n = n[1:]
-        note_obj = note(shape=shape)
-        note_obj.update(n)
-        notes.append(note_obj)
-    return notes
 
-def write(file, value):
-    for d in value:
-        data = struct.pack("<h", d)
-        file.writeframesraw(data)
+class music:
+    """ This class is used to represent a piece of music.
+    It contains a list of notes and a method to play the music.
+    """
+    def __init__(self, score: str):
+        self.score = score
+        self.notes = []
+        self.score_to_notes()
+    
+    def __str__(self):
+        return self.score
+    
+    def score_to_notes(self):
+        notelist = self.score.split()
+        shape = "s"  # default shape
+        for n in notelist:
+            n = n.strip()
+            if n[0] in ["s", "q"]:
+                shape = n[0]
+                n = n[1:]
+            note_obj = note(shape=shape)
+            note_obj.update(n)
+            self.notes.append(note_obj)
+    
+    def write_wav(self, filename="music.wav", sample_rate=44100): #44100 Hz
+        rawdata = []
+        for note_obj in self.notes:
+            rawdata.extend(note_obj.note_to_wave(sample_rate))
 
+        with wave.open(filename, "w") as f:
+            f.setnchannels(1) # mono
+            f.setsampwidth(2) # 2 bytes (16 bits)
+            f.setframerate(sample_rate)
+            for d in rawdata:
+                f.writeframesraw(struct.pack("<h", d))
+        
+        
 def simpler():
     score = "r 2eb4 2f4 2g4 2bb4 2g4 3g4 r f4 f4 2eb4 3f4 r 2eb4 2c4 2eb4 2f4 5g4 3r 2eb4 " \
     "2c4 3eb4 r bb3 bb3 2f4 3eb4 r 2g4 2f4 2f4 2eb4 4f4 q2eb 2f 2bb 2g 3g r f f 2eb 3f r "\
     "2eb 2c 2eb 2bb 5g 3r 2eb 2c 3eb r bb3 bb3 2f 3eb r 2g 2f 2eb 2c 4eb"
-
-    notes = score_to_notes(score)
-    
-    # Writing a monophonic melody
-    rawdata = []
-    sample_rate = 44100  # Hz
-    for note_obj in notes:
-        rawdata.extend(note_obj.note_to_wave(sample_rate))
-
+    music_obj = music(score)
     filename = "music.wav"
-    with wave.open(filename, "w") as f:
-        f.setnchannels(1)  # mono
-        f.setsampwidth(2)
-        f.setframerate(sample_rate)
-        write(f, rawdata)
+    music_obj.write_wav(filename=filename, sample_rate=44100)
 
     if platform == "linux" or platform == "linux2":
         os.system("aplay " + filename)
