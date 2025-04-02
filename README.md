@@ -108,8 +108,7 @@ Python TODO list:
  - [ ] add polyphony (fugue)
  - [ ] live waveform plotting matplotlib like oscilloscope
  - [x] playsound on the go with Enter (plays the line just completed)
- - [ ] checkbox for playsound with Enter
- - [ ] threading, running playsound at background
+ - [ ] threading, running playsound at background (already okay with vlc open)
 
 C++ TODO list:
 

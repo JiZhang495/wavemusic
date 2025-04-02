@@ -18,7 +18,7 @@ class WaveMusicGUI:
         self.instruction_label.config(font=("Arial", 12))
 
         # Entry box for typing score
-        self.score_entry = tk.Text(root, height=15, width=50)
+        self.score_entry = tk.Text(root, height=15, width=80)
         self.score_entry.pack(pady=10)
         self.score_entry.config(font=("Courier", 10))
         # example score
@@ -40,10 +40,28 @@ class WaveMusicGUI:
         self.save_file_button = tk.Button(self.file_buttons_frame, text="Save Score", command=self.save_score)
         self.save_file_button.pack(side=tk.LEFT, padx=5)
 
-        # Frame for filename entry and tickbox
+        # Frame for filename entries and tickboxes and create WAV button
         self.playmusic_frame = tk.Frame(root)
         self.playmusic_frame.pack(pady=5)
 
+        # Frame for temp file
+        self.tempfile_frame = tk.Frame(self.playmusic_frame)
+        self.tempfile_frame.pack(side=tk.LEFT, padx=5)
+        self.tempfile_frame.config(width=200)
+
+        # textbox for temp file
+        self.tempfile_label = tk.Label(self.tempfile_frame, text="Temp file for live playing: temp.wav")
+        self.tempfile_label.pack(side=tk.TOP, padx=5)
+        self.tempfile_label.config(font=("Arial", 9))
+
+        # tickbox for playing temp file
+        self.temp_var = tk.BooleanVar()
+        self.temp_var.set(True)  # default to checked
+        self.temp_checkbutton = tk.Checkbutton(self.tempfile_frame, text="Live playing with Enter key", variable=self.temp_var)
+        self.temp_checkbutton.pack(side=tk.TOP, padx=5)
+        self.temp_checkbutton.config(font=("Arial", 9))
+
+        # Frame for full music file
         self.musicfile_frame = tk.Frame(self.playmusic_frame)
         self.musicfile_frame.pack(side=tk.LEFT, padx=5)
         self.musicfile_frame.config(width=200)
