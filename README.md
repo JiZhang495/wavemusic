@@ -1,3 +1,4 @@
+
 # WaveMusic
 Writing music audio files using sine, square, triangular and sawtooth wave
 
@@ -66,6 +67,7 @@ make refresh DEBUG=1
 
 
 ## Python Implementation
+
 The *wave* module in the Python standard library provides a convenient interface to the WAV sound format.
 References:
 <https://docs.python.org/3/library/wave.html>
@@ -80,19 +82,10 @@ To run the python script:
 ./main.py
 ```
 
-To use uv for dependency management:
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sudo sh
-```
-Sync Python version, set up .venv, sync dependencies from 'pyproject.toml':
-```bash
-uv sync
-```
-Run project:
+With uv:
 ```bash
 uv run main.py
 ```
-
 
 
 ----
@@ -118,3 +111,54 @@ C++ TODO list:
  - [x] polyphony doesn't sound out of tune anymore?
  - [x] saw and square waves sounds bad, add LPF to soften it
 
+
+ ----
+Using [uv](https://docs.astral.sh/uv/) for Python dependency management
+Installing uv:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+Syncing Python version, .venv, dependencies (optional command):
+```bash
+uv sync
+```
+Using .venv (optional command, as it should be automatic):
+```bash
+source ./venv/Scripts/activate
+```
+Syncing and running project:
+```bash
+uv run main.py
+```
+Linting with ruff:
+```bash
+uvx ruff check .
+```
+```bash
+uvx ruff format
+```
+
+Other useful commands:
+Creating 'pyproject.toml' and '.python-version:
+```bash
+uv init
+```
+Adding package dependencies to 'pyproject.toml':
+```bash
+uv add <package>
+```
+Adding package dependencies from 'requirements.txt' to 'pyproject.toml':
+```bash
+uv add -r requirements.txt
+```
+Adding ruff and pytest as development dependencies:
+```bash
+uv add ruff --dev
+```
+```bash
+uv add pytest --dev
+```
+Generating 'requirements.txt' from a UV lock file:
+```bash
+uv export -o requirements.txt
+```
