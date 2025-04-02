@@ -23,13 +23,16 @@ def square_wave_n(n, sample_rate, freq):
     samples_per_cycle = sample_rate / freq
     return 1 if int(n % samples_per_cycle) < (samples_per_cycle / 2) else -1
 
+# def triangle_wave(t, freq):
+#     period = 1 / freq
+#     phase = t % period
+#     if phase < period / 2:
+#         return 2 * phase / period - 1
+#     else:
+#         return 1 - 2 * (phase - period / 2) / period
+
 def triangle_wave(t, freq):
-    period = 1 / freq
-    phase = t % period
-    if phase < period / 2:
-        return 2 * phase / period - 1
-    else:
-        return 1 - 2 * (phase - period / 2) / period
+    return 2 * abs(2 * (freq * t - math.floor(freq * t + 0.5))) - 1
     
 def triangle_wave_n(n, sample_rate, freq):
     samples_per_cycle = sample_rate / freq

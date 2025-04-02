@@ -27,6 +27,9 @@ class WaveMusicGUI:
         "eb c eb bb | 5g 3r | web c 3eb 1r | 1bb3 1bb3 f 3eb 1r | g f eb c | 4eb"
         self.score_entry.insert(tk.END, example_score)
 
+        # Plays previous line upon pressing Enter
+        self.score_entry.bind("<Return>", lambda _: self.play_line())
+
         # Open file link to load score and save score
         self.file_buttons_frame = tk.Frame(root)
         self.file_buttons_frame.pack(pady=5)
@@ -111,4 +114,19 @@ class WaveMusicGUI:
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to play WAV file: {e}")
             # playsound(filename)
+    
+    def play_line(self):
+        # get last line of text in score_entry and write to temp.wav
+        score = self.score_entry.get(1.0, tk.END).strip()
+        if not score:
+            return
+        last_line = score.splitlines()[-1]  # Extract the last line
+        if not last_line.strip():  # Check if the last line is empty
+            return
+        try:
+            Music(last_line).write_wav(filename="temp.wav", sample_rate=44100, bpm=100)
+            play_wav(filename="temp.wav")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to play line: {e}")
+
         
