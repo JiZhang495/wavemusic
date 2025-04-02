@@ -112,8 +112,9 @@ C++ TODO list:
  - [x] saw and square waves sounds bad, add LPF to soften it
 
 
- ----
+----
 Using [uv](https://docs.astral.sh/uv/) for Python dependency management
+
 Installing uv:
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -139,6 +140,7 @@ uvx ruff format
 ```
 
 Other useful commands:
+
 Creating 'pyproject.toml' and '.python-version:
 ```bash
 uv init
