@@ -35,7 +35,7 @@ class Note:
             string = string[:-1]
         self.name = string
         freq_expt = note_name_to_freq(self.name)
-        if freq_expt:
+        if freq_expt is not None:
             self.frequency = 440 * math.pow(2, freq_expt / 12 + self.octave - 4)
     
     def update_shape(self, shape):
