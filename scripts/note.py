@@ -3,6 +3,12 @@ from scripts.utils import (
     is_integer, 
     note_name_to_freq,
 )
+from scripts.waveforms import (
+    sine_wave_n, 
+    square_wave_n,
+    triangle_wave_n,
+    sawtooth_wave_n,
+)
 
 class Note:
     """ "length" is measured as multiples of a semiquaver
@@ -47,12 +53,16 @@ class Note:
                 value.append(0)
         else:
             if self.shape == "s": # sine wave
-                for i in range(frames):
-                    value.append(int(6000 * math.sin(2 * math.pi * self.frequency * i / sample_rate)))
+                for n in range(frames):
+                    value.append(int(4000 * sine_wave_n(n, sample_rate, self.frequency)))
             elif self.shape == "q": # square wave
                 for i in range(frames):
-                    if int(float(i) / sample_rate * 2 * self.frequency) % 2:
-                        value.append(-2000)
-                    else:
-                        value.append(2000)
+                    value.append(int(1000 * square_wave_n(i, sample_rate, self.frequency)))
+            elif self.shape == "t": # triangle wave
+                for i in range(frames):
+                    value.append(int(2000 * triangle_wave_n(i, sample_rate, self.frequency)))
+            elif self.shape == "w": # sawtooth wave
+                for i in range(frames):
+                    value.append(int(2000 * sawtooth_wave_n(i, sample_rate, self.frequency)))
+                
         return value

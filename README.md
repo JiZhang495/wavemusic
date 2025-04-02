@@ -97,13 +97,16 @@ uv run main.py
 
 ----
 Python TODO list:
- - [ ] add waveforms.py to store functions for each waveform
+
+ - [x] add waveforms.py to store functions for each waveform
+ - [ ] use numpy for faster performance
  - [ ] the functions can be added to produce complex timber and polyphony
  - [ ] add loudness: ff, f, fp, p, pp
  - [ ] add dynamics: cresc, dim
  - [ ] add timber
  - [x] GUI
  - [ ] add polyphony (fugue)
+ - [ ] live waveform plotting matplotlib like oscilloscope
 
 C++ TODO list:
 

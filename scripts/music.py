@@ -26,7 +26,11 @@ class Music:
                     shape = "s"
                 elif n == "square:":
                     shape = "q"
-            if n[0] in ["s", "q"]:
+                elif n == "triangle:":
+                    shape = "t"
+                elif n == "sawtooth:":
+                    shape = "w"
+            if n[0] in ["s", "q", "t", "w"]:
                 shape = n[0]
                 n = n[1:]
             note_obj = Note(shape=shape)
@@ -43,6 +47,7 @@ class Music:
             f.setsampwidth(2)  # 2 bytes (16 bits)
             f.setframerate(sample_rate)
             f.writeframes(struct.pack("<" + "h" * len(rawdata), *rawdata))
+            # f.writeframesraw(b"".join([struct.pack("<h", d) for d in rawdata]))
             # for d in rawdata:
             #     f.writeframesraw(struct.pack("<h", d))
     
