@@ -18,7 +18,7 @@ class Music:
     
     def score_to_notes(self):
         notelist = self.score.split()
-        shape = "s"  # default shape
+        shape = "t"  # default shape
         for n in notelist:
             n = n.strip()
             if n[-1] == ":": #signals waveform change (signalling another melody polyphony to be added)

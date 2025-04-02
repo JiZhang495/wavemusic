@@ -15,7 +15,7 @@ class Note:
     "note" takes either the note name or frequency (Hz) of the note (feature to be added)
     "r" is used as the note name of rests
     """
-    def __init__(self, shape="s", length=2, name="r", octave=4):
+    def __init__(self, shape="t", length=2, name="r", octave=4):
         self.shape = shape
         self.length = length
         self.name = name
@@ -39,10 +39,10 @@ class Note:
             self.frequency = 440 * math.pow(2, freq_expt / 12 + self.octave - 4)
     
     def update_shape(self, shape):
-        if shape in ["q", "s"]:
+        if shape in ["s", "q", "t", "w"]:
             self.shape = shape
         else:
-            raise ValueError(f"Invalid shape: {shape}. Expected 'q' or 's'.")
+            raise ValueError(f"Invalid shape: {shape}. Expected 's', 'q', 't', 'w'.")
         
     def note_to_wave(self, sample_rate, bpm=100):
         semiquaver = 15 / bpm #s
