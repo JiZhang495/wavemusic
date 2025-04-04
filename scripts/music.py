@@ -30,6 +30,7 @@ class Music:
                     shape = "t"
                 elif n == "sawtooth:":
                     shape = "w"
+                continue
             if n[0] in ["s", "q", "t", "w"]:
                 shape = n[0]
                 n = n[1:]
@@ -37,7 +38,7 @@ class Music:
             note_obj.update(n)
             self.notes.append(note_obj)
     
-    def write_wav(self, filename="music.wav", sample_rate=44100, bpm=100): #44100 Hz
+    def write_wav(self, filename="m.wav", sample_rate=44100, bpm=100): #44100 Hz
         rawdata = []
         for note_obj in self.notes:
             rawdata.extend(note_obj.note_to_wave(sample_rate=sample_rate, bpm=bpm))
@@ -51,11 +52,11 @@ class Music:
             # for d in rawdata:
             #     f.writeframesraw(struct.pack("<h", d))
     
-    def playscore(self, filename="music.wav", sample_rate=44100, bpm=100):
+    def playscore(self, filename="m.wav", sample_rate=44100, bpm=100):
         self.write_wav(filename=filename, sample_rate=sample_rate, bpm=bpm)
         play_wav(filename=filename)
 
-    def play_from_playsound(self, filename="music.wav", sample_rate=44100, bpm=100):
+    def play_from_playsound(self, filename="m.wav", sample_rate=44100, bpm=100):
         """ This method is used to play the music using playsound library after writing WAV.
         """
         global ps

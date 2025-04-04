@@ -2,7 +2,9 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from scripts.music import Music
 from playsound import playsound
+import re
 from scripts.utils import play_wav
+from scripts.part_gui import PartGUI
 
 class WaveMusicGUI:
     def __init__(self, root):
@@ -17,25 +19,17 @@ class WaveMusicGUI:
         self.instruction_label.pack(pady=5)
         self.instruction_label.config(font=("Arial", 12))
 
-        # Entry box for typing score
-        self.score_entry = tk.Text(root, height=15, width=80)
-        self.score_entry.pack(pady=10)
-        self.score_entry.config(font=("Courier", 10))
-        # example score
-        example_score = "s1r eb f g | bb g 3g 1r | 1f 1f eb 3f 1r | eb c eb f | 5g 3r | teb " \
-        "c 3eb 1r | 1bb3 1bb3 f 3eb 1r | g f f eb | 4f qeb f | bb g 3g 1r | 1f 1f eb 3f 1r | "\
-        "eb c eb bb | 5g 3r | web c 3eb 1r | 1bb3 1bb3 f 3eb 1r | g f eb c | 4eb"
-        self.score_entry.insert(tk.END, example_score)
-
-        # Plays previous line upon pressing Enter
-        self.score_entry.bind("<Return>", lambda _: self.play_line())
+        self.part0 = PartGUI(self)
+        self.part1 = PartGUI(self)
+        self.part2 = PartGUI(self)
+        self.part3 = PartGUI(self)
 
         # Open file link to load score and save score
         self.file_buttons_frame = tk.Frame(root)
         self.file_buttons_frame.pack(pady=5)
 
-        self.open_file_button = tk.Button(self.file_buttons_frame, text="Load Score", command=self.load_score)
-        self.open_file_button.pack(side=tk.LEFT, padx=5)
+        self.load_file_button = tk.Button(self.file_buttons_frame, text="Load Score", command=self.load_score)
+        self.load_file_button.pack(side=tk.LEFT, padx=5)
 
         self.save_file_button = tk.Button(self.file_buttons_frame, text="Save Score", command=self.save_score)
         self.save_file_button.pack(side=tk.LEFT, padx=5)
@@ -48,12 +42,10 @@ class WaveMusicGUI:
         self.tempfile_frame = tk.Frame(self.playmusic_frame)
         self.tempfile_frame.pack(side=tk.LEFT, padx=5)
         self.tempfile_frame.config(width=200)
-
         # textbox for temp file
         self.tempfile_label = tk.Label(self.tempfile_frame, text="Temp file for live playing: temp.wav")
         self.tempfile_label.pack(side=tk.TOP, padx=5)
         self.tempfile_label.config(font=("Arial", 9))
-
         # tickbox for playing temp file
         self.temp_var = tk.BooleanVar()
         self.temp_var.set(True)  # default to checked
@@ -65,13 +57,11 @@ class WaveMusicGUI:
         self.musicfile_frame = tk.Frame(self.playmusic_frame)
         self.musicfile_frame.pack(side=tk.LEFT, padx=5)
         self.musicfile_frame.config(width=200)
-
-        # entry box for filename, default is music.wav, get entry as a variable
-        self.filename = tk.StringVar()
-        self.filename.set("music.wav")
+        # entry box for filename, default is m.wav, get entry as a variable
+        self.filename = tk.StringVar() # save as filename
+        self.filename.set("m.wav")
         self.filename_entry = tk.Entry(self.musicfile_frame, textvariable=self.filename, width=20)
         self.filename_entry.pack(side=tk.TOP, padx=5)
-
         # tickbox for playing WAV
         self.play_var = tk.BooleanVar()
         self.play_var.set(True)  # default to checked
@@ -80,38 +70,93 @@ class WaveMusicGUI:
         self.play_checkbutton.config(font=("Arial", 9))
 
         # Button for creating WAV
-        self.create_wav_button = tk.Button(self.playmusic_frame, text="Create WAV", command=self.create_wav, height=2, width=15)
+        self.create_wav_button = tk.Button(self.playmusic_frame, text="Create WAV", 
+                                           command=self.create_wav, height=2, width=15)
+        # self.create_wav_button = tk.Button(self.playmusic_frame, text="Create WAV", 
+        #                                    command=self.create_wav_cpp, height=2, width=15)
         self.create_wav_button.pack(side=tk.LEFT, padx=5)
         self.create_wav_button.config(font=("Arial", 12))
 
     def load_score(self):
         file_path = filedialog.askopenfilename(
-            initialdir="sheets", defaultextension=".txt", filetypes=[("WaveMusic Files", "*.wmusic"), ("Text Files", "*.txt")])
+            initialdir="sheets", defaultextension=".wmusic", filetypes=[("WaveMusic Files", "*.wmusic"), ("Text Files", "*.txt")])
         if file_path:
             try:
-                with open(file_path) as file:
-                    score = file.read()
-                    self.score_entry.delete(1.0, tk.END)
-                    self.score_entry.insert(tk.END, score)
+                self.load_score_filepath(file_path)
             except Exception as e:
-                messagebox.showerror("Error", f"Failed to load file: {e}")#
+                messagebox.showerror("Error", f"Failed to load file: {e}")
     
+    def load_score_filepath(self, file_path):
+        # Clear existing score entries
+        self.part0.score_entry.delete(1.0, tk.END)
+        self.part1.score_entry.delete(1.0, tk.END)
+        self.part2.score_entry.delete(1.0, tk.END)
+        self.part3.score_entry.delete(1.0, tk.END)
+
+        with open(file_path) as file:
+            score = file.read()
+            # # Find all sections starting with a label (e.g. square:, triangle:, etc.)
+            # matches = re.findall(r'^(\w+):([\s\S]*?)(?=^\w+:|\Z)', text, re.MULTILINE)
+            # # Convert to dictionary: key = label without colon, value = corresponding score
+            # score_dict = {label: content.strip() for label, content in matches}
+            blocks = re.split(r'(?=\b(?:square|triangle|sine|sawtooth):)', score)
+            blocks = [block.strip() for block in blocks if block.strip()]
+            if blocks[0]:
+                block0 = blocks[0].split(":")
+                if len(block0) > 1:
+                    self.part0.waveform_var.set(block0[0].strip())
+                self.part0.score_entry.insert(tk.END, block0[-1].strip())
+            if len(blocks)> 1 and blocks[1]:
+                block1 = blocks[1].split(":")
+                if len(block1) > 1:
+                    self.part1.waveform_var.set(block1[0].strip())
+                self.part1.score_entry.insert(tk.END, block1[-1].strip())
+            if len(blocks) > 2 and blocks[2]:
+                block2 = blocks[2].split(":")
+                if len(block2) > 1:
+                    self.part2.waveform_var.set(block2[0].strip())
+                self.part2.score_entry.insert(tk.END, block2[-1].strip())
+            if len(blocks) > 3 and blocks[3]:
+                block3 = blocks[3].split(":")
+                if len(block3) > 1:
+                    self.part3.waveform_var.set(block3[0].strip())
+                self.part3.score_entry.insert(tk.END, block3[-1].strip())
+
     def save_score(self):
         file_path = filedialog.asksaveasfilename(
-            initialdir="sheets", defaultextension=".txt", filetypes=[("WaveMusic Files", "*.wmusic")])
+            initialdir="sheets", defaultextension=".wmusic", filetypes=[("WaveMusic Files", "*.wmusic")])
         if file_path:
             try:
-                with open(file_path, 'w') as file:
-                    score = self.score_entry.get(1.0, tk.END).strip()
-                    file.write(score)
+                self.save_score_filepath(file_path)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to save file: {e}")
+    
+    def save_score_filepath(self, file_path):
+        with open(file_path, 'w') as file:
+            waveform0 = self.part0.waveform_var.get()
+            waveform1 = self.part1.waveform_var.get()
+            waveform2 = self.part2.waveform_var.get()
+            waveform3 = self.part3.waveform_var.get()
+            score0 = self.part0.score_entry.get(1.0, tk.END).strip()
+            score1 = self.part1.score_entry.get(1.0, tk.END).strip()
+            score2 = self.part2.score_entry.get(1.0, tk.END).strip()
+            score3 = self.part3.score_entry.get(1.0, tk.END).strip()
+            score = (
+                f"{waveform0}: {score0} \n"
+                f"{waveform1}: {score1} \n"
+                f"{waveform2}: {score2} \n"
+                f"{waveform3}: {score3}"
+            )
+            # score = re.sub(r"(\w+):", r"\1:", score)  # remove spaces before colons
+            file.write(score)
+            return score
 
     def create_wav(self):
-        score = self.score_entry.get(1.0, tk.END).strip()
-        if not score:
-            messagebox.showwarning("Warning", "Score is empty!")
-            return
+        # score = self.score_entry1.get(1.0, tk.END).strip()
+        score = self.save_score_filepath("sheets/temp.wmusic")
+        # if not score:
+        #     messagebox.showwarning("Warning", "Score is empty!")
+        #     return
         if not self.filename.get():
             messagebox.showwarning("Warning", "Filename is empty!")
             return     
@@ -132,19 +177,9 @@ class WaveMusicGUI:
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to play WAV file: {e}")
             # playsound(filename)
-    
-    def play_line(self):
-        # get last line of text in score_entry and write to temp.wav
-        score = self.score_entry.get(1.0, tk.END).strip()
-        if not score:
-            return
-        last_line = score.splitlines()[-1]  # Extract the last line
-        if not last_line.strip():  # Check if the last line is empty
-            return
-        try:
-            Music(last_line).write_wav(filename="temp.wav", sample_rate=44100, bpm=100)
-            play_wav(filename="temp.wav")
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to play line: {e}")
+
+    def create_wav_cpp(self):
+        self.save_score_filepath("sheets/temp.wmusic")
+        pass # Call the C++ function here to create the WAV file
 
         

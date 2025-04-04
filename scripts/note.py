@@ -28,8 +28,12 @@ class Note:
     def update(self, string):
         # string = string.strip()
         if is_integer(string[0]):
-            self.length = int(string[0])
-            string = string[1:]
+            if is_integer(string[1]):
+                self.length = int(string[:2])
+                string = string[2:]
+            else:
+                self.length = int(string[0])
+                string = string[1:]
         if is_integer(string[-1]):
             self.octave = int(string[-1])
             string = string[:-1]

@@ -92,6 +92,7 @@ uv run main.py
 Python TODO list:
 
  - [x] add waveforms.py to store functions for each waveform
+ - [ ] add bpm and sample rate selection
  - [ ] use numpy for faster performance
  - [ ] the functions can be added to produce complex timber and polyphony
  - [ ] add loudness: ff, f, fp, p, pp
