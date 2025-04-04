@@ -1,6 +1,7 @@
 import wave
 import struct
 from scripts.note import Note
+from scripts.utils import is_integer
 from scripts.utils import play_wav
 ps = None # placeholder for playsound import
 
@@ -19,8 +20,12 @@ class Music:
     def score_to_notes(self):
         notelist = self.score.split()
         shape = "t"  # default shape
+        length = 2  # default length
+        octave = 4  # default octave
+
         for n in notelist:
             n = n.strip()
+            # when encountering label words, update shape
             if n[-1] == ":": #signals waveform change (signalling another melody polyphony to be added)
                 if n == "sine:":
                     shape = "s"
@@ -31,11 +36,24 @@ class Music:
                 elif n == "sawtooth:":
                     shape = "w"
                 continue
+
+            # update shape, length and octave if they are present in the note
             if n[0] in ["s", "q", "t", "w"]:
                 shape = n[0]
                 n = n[1:]
-            note_obj = Note(shape=shape)
-            note_obj.update(n)
+            if is_integer(n[0]):
+                if is_integer(n[1]):
+                    length = int(n[:2])
+                    n = n[2:]
+                else:
+                    length = int(n[0])
+                    n = n[1:]
+            if is_integer(n[-1]):
+                octave = int(n[-1])
+                n = n[:-1]
+            
+            note_obj = Note(shape=shape, length=length, octave=octave)
+            note_obj.update(n)  # update the note name and frequency
             self.notes.append(note_obj)
     
     def write_wav(self, filename="m.wav", sample_rate=44100, bpm=100): #44100 Hz

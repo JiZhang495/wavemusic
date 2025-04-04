@@ -23,20 +23,20 @@ class Note:
         self.frequency = None 
 
     def __str__(self):
-        return f"{self.length}{self.name}{self.octave}"
+        return f"{self.shape}{self.length}{self.name}{self.octave}"
     
     def update(self, string):
         # string = string.strip()
-        if is_integer(string[0]):
-            if is_integer(string[1]):
-                self.length = int(string[:2])
-                string = string[2:]
-            else:
-                self.length = int(string[0])
-                string = string[1:]
-        if is_integer(string[-1]):
-            self.octave = int(string[-1])
-            string = string[:-1]
+        # if is_integer(string[0]):
+        #     if is_integer(string[1]):
+        #         self.length = int(string[:2])
+        #         string = string[2:]
+        #     else:
+        #         self.length = int(string[0])
+        #         string = string[1:]
+        # if is_integer(string[-1]):
+        #     self.octave = int(string[-1])
+        #     string = string[:-1]
         self.name = string
         freq_expt = note_name_to_freq(self.name)
         if freq_expt is not None:

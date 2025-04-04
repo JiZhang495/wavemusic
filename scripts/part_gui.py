@@ -45,8 +45,5 @@ class PartGUI:
             last_line = f"{self.waveform_var.get()}: {last_line}"
             Music(last_line).write_wav(filename="temp.wav", sample_rate=44100, bpm=100)
             play_wav("temp.wav")
-            # Here you would call your music playing function
-            print(f"Playing line: {last_line}")
-            # Example: Music.play_line(score, self.waveform_var.get())
         except Exception as e:
             messagebox.showerror("Error", f"Failed to play line: {e}")
