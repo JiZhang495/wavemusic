@@ -1,6 +1,7 @@
 import wave
 import struct
 from scripts.note import Note
+from scripts.utils import is_integer
 from scripts.utils import play_wav
 ps = None # placeholder for playsound import
 
@@ -19,8 +20,12 @@ class Music:
     def score_to_notes(self):
         notelist = self.score.split()
         shape = "t"  # default shape
+        length = 2  # default length
+        octave = 4  # default octave
+
         for n in notelist:
             n = n.strip()
+            # when encountering label words, update shape
             if n[-1] == ":": #signals waveform change (signalling another melody polyphony to be added)
                 if n == "sine:":
                     shape = "s"
@@ -30,14 +35,28 @@ class Music:
                     shape = "t"
                 elif n == "sawtooth:":
                     shape = "w"
+                continue
+
+            # update shape, length and octave if they are present in the note
             if n[0] in ["s", "q", "t", "w"]:
                 shape = n[0]
                 n = n[1:]
-            note_obj = Note(shape=shape)
-            note_obj.update(n)
+            if is_integer(n[0]):
+                if is_integer(n[1]):
+                    length = int(n[:2])
+                    n = n[2:]
+                else:
+                    length = int(n[0])
+                    n = n[1:]
+            if is_integer(n[-1]):
+                octave = int(n[-1])
+                n = n[:-1]
+            
+            note_obj = Note(shape=shape, length=length, octave=octave)
+            note_obj.update(n)  # update the note name and frequency
             self.notes.append(note_obj)
     
-    def write_wav(self, filename="music.wav", sample_rate=44100, bpm=100): #44100 Hz
+    def write_wav(self, filename="m.wav", sample_rate=44100, bpm=100): #44100 Hz
         rawdata = []
         for note_obj in self.notes:
             rawdata.extend(note_obj.note_to_wave(sample_rate=sample_rate, bpm=bpm))
@@ -51,11 +70,11 @@ class Music:
             # for d in rawdata:
             #     f.writeframesraw(struct.pack("<h", d))
     
-    def playscore(self, filename="music.wav", sample_rate=44100, bpm=100):
+    def playscore(self, filename="m.wav", sample_rate=44100, bpm=100):
         self.write_wav(filename=filename, sample_rate=sample_rate, bpm=bpm)
         play_wav(filename=filename)
 
-    def play_from_playsound(self, filename="music.wav", sample_rate=44100, bpm=100):
+    def play_from_playsound(self, filename="m.wav", sample_rate=44100, bpm=100):
         """ This method is used to play the music using playsound library after writing WAV.
         """
         global ps

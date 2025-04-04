@@ -91,7 +91,10 @@ uv run main.py
 ----
 Python TODO list:
 
+ - [ ] use C++ code as a backend
  - [x] add waveforms.py to store functions for each waveform
+ - [ ] use () to pass frequecies or chords
+ - [ ] add bpm and sample rate selection
  - [ ] use numpy for faster performance
  - [ ] the functions can be added to produce complex timber and polyphony
  - [ ] add loudness: ff, f, fp, p, pp
