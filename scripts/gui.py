@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from scripts.music import Music
-from playsound import playsound
+# from playsound import playsound
 import re
 from scripts.utils import play_wav
 from scripts.part_gui import PartGUI
