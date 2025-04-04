@@ -5,8 +5,7 @@ from scripts.utils import play_wav
 
 class PartGUI:
     def __init__(self, master):
-        self.master = master
-        self.part_frame = tk.Frame(master.root)
+        self.part_frame = tk.Frame(master.frame)
         self.part_frame.pack(pady=5)
 
         # Part options

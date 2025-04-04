@@ -8,16 +8,15 @@ from scripts.part_gui import PartGUI
 
 class WaveMusicGUI:
     def __init__(self, root):
-        self.root = root
-        self.root.title("WaveMusic")
+        self.frame = tk.Frame(root)
 
         # text: Hello from wavemusic! Enter your score below:
-        self.label = tk.Label(root, text="Hello from WaveMusic!")
-        self.label.pack(pady=10)
-        self.label.config(font=("Arial", 16))
-        self.instruction_label = tk.Label(root, text="Enter your score below:")
-        self.instruction_label.pack(pady=5)
-        self.instruction_label.config(font=("Arial", 12))
+        label = tk.Label(self.frame, text="Hello from WaveMusic!")
+        label.pack(pady=10)
+        label.config(font=("Arial", 16))
+        instruction_label = tk.Label(self.frame, text="Enter your score below:")
+        instruction_label.pack(pady=5)
+        instruction_label.config(font=("Arial", 12))
 
         self.part0 = PartGUI(self)
         self.part1 = PartGUI(self)
@@ -25,7 +24,7 @@ class WaveMusicGUI:
         self.part3 = PartGUI(self)
 
         # Open file link to load score and save score
-        self.file_buttons_frame = tk.Frame(root)
+        self.file_buttons_frame = tk.Frame(self.frame)
         self.file_buttons_frame.pack(pady=5)
 
         self.load_file_button = tk.Button(self.file_buttons_frame, text="Load Score", command=self.load_score)
@@ -35,7 +34,7 @@ class WaveMusicGUI:
         self.save_file_button.pack(side=tk.LEFT, padx=5)
 
         # Frame for filename entries and tickboxes and create WAV button
-        self.playmusic_frame = tk.Frame(root)
+        self.playmusic_frame = tk.Frame(self.frame)
         self.playmusic_frame.pack(pady=5)
 
         # Frame for temp file
@@ -43,9 +42,9 @@ class WaveMusicGUI:
         self.tempfile_frame.pack(side=tk.LEFT, padx=5)
         self.tempfile_frame.config(width=200)
         # textbox for temp file
-        self.tempfile_label = tk.Label(self.tempfile_frame, text="Temp file for live playing: temp.wav")
-        self.tempfile_label.pack(side=tk.TOP, padx=5)
-        self.tempfile_label.config(font=("Arial", 9))
+        tempfile_label = tk.Label(self.tempfile_frame, text="Temp file for live playing: temp.wav")
+        tempfile_label.pack(side=tk.TOP, padx=5)
+        tempfile_label.config(font=("Arial", 9))
         # tickbox for playing temp file
         self.temp_var = tk.BooleanVar()
         self.temp_var.set(True)  # default to checked

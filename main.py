@@ -10,9 +10,16 @@ def main():
     "2eb 2c 2eb 2bb | 5g 3r | w2eb 2c 3eb 1r | 1bb3 1bb3 2f4 3eb 1r | 2g 2f 2eb 2c | 4eb"
     Music(score).playscore(filename="m.wav", sample_rate=44100, bpm=100)
 
+class MainApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("WaveMusic")
+        self.gui = WaveMusicGUI(root)
+        self.gui.frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
 def main_gui():
     root = tk.Tk()
-    app = WaveMusicGUI(root)
+    app = MainApp(root)
     root.mainloop()
 
 if __name__ == "__main__":
