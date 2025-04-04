@@ -86,6 +86,18 @@ With uv:
 ```bash
 uv run main.py
 ```
+or
+```bash
+uv run main.py gui
+```
+To use command-line interface:
+```bash
+uv run main.py cli
+```
+To generate WAV from score:
+```bash
+uv run main.py sheets/<title>.wmusic
+```
 
 
 ----
