@@ -55,10 +55,12 @@ def main(*args):
     if score == ":q":
         print("No score entered. Exiting...")
         return
+    Music(score).playscore(filename="temp.wav", sample_rate=44100, bpm=100)
     input_score = ""
     while input_score != ":q":
         score += input_score + " "
         input_score = input()
+        Music(input_score).playscore(filename="temp.wav", sample_rate=44100, bpm=100)
     score = score.replace("|", "")  # remove the bar lines
     if score is None or score == "":
         print("No score entered. Exiting...")
