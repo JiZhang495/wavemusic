@@ -3,5 +3,21 @@
 *.out
 *~
 simple
-scripts/__pycache__
+
 sheets/temp.wmusic
+
+.venv/
+
+# Python cache files
+scripts/__pycache__/
+__pycache__/
+*.py[cod]
+
+# Complied extension modules
+*.so
+*.pyd
+
+# Build artifacts
+build/
+dist/
+*.egg-info/

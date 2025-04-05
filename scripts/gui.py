@@ -5,6 +5,7 @@ from scripts.music import Music
 import re
 from scripts.utils import play_wav
 from scripts.part_gui import PartGUI
+from src.simple import main_pybind
 
 class WaveMusicGUI:
     def __init__(self, root):
@@ -167,7 +168,9 @@ class WaveMusicGUI:
         #     if not overwrite:
         #         return
         try:
-            Music(score).write_wav(filename=filename, sample_rate=44100, bpm=100)
+            # Music(score).write_wav(filename=filename, sample_rate=44100, bpm=100)
+            main_pybind(["1", "sheets/temp.wmusic"]) # why need to pass another argument?
+
         except Exception as e:
             messagebox.showerror("Error", f"Failed to create WAV file: {e}")
         if self.play_var.get():
