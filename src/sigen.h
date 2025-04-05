@@ -5,6 +5,13 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <cstdint> // added for uint8_t, uint32_t, etc.
+#define _USE_MATH_DEFINES
+#include <cmath>   // added for M_PI, sin()
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 
 #define S_RATE 44100
 #define BPM 100
@@ -16,7 +23,7 @@
 // cut off frequency of LPF
 #define LPF_FC 10000
 
-enum shape_t: uint8_t {none, sine, square, triangle, saw};
+enum class shape_t: uint8_t {none, sine, square, triangle, saw};
 typedef std::unordered_map<std::string, float> f_lut_t;
 
 class note_t {
