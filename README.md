@@ -153,12 +153,17 @@ To run the python script:
 ```bash
 python main.py
 ```
+To build a standalone app:
+```bash
+pyinstaller main.py --onefile 
+# pyinstaller main.py --onefile --clean --noconsole --icon=icon.ico
+```
 
 
 ----
 Python TODO list:
 
- - [ ] use C++ code as a backend
+ - [x] use C++ code as a backend
  - [x] add waveforms.py to store functions for each waveform
  - [ ] use () to pass frequecies or chords
  - [ ] add bpm and sample rate selection
