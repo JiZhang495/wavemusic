@@ -33,7 +33,7 @@ def square_wave_n(n, sample_rate, freq):
 
 def triangle_wave(t, freq):
     return 2 * abs(2 * (freq * t - math.floor(freq * t + 0.5))) - 1
-    
+
 def triangle_wave_n(n, sample_rate, freq):
     samples_per_cycle = sample_rate / freq
     phase = n % samples_per_cycle

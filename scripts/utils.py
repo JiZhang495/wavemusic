@@ -7,12 +7,12 @@ def is_integer(s):
         return True
     except ValueError:
         return False
-    
+
 def note_name_to_freq(name):
     map = {
         "c": -9,
         "cs": -8, "c+": -8, "c#": -8,
-        "db": -8, "d-": -8, 
+        "db": -8, "d-": -8,
         "d": -7,
         "ds": -6, "d+": -6, "d#": -6,
         "eb": -6, "e-": -6,
