@@ -37,7 +37,6 @@ def main(*args):
             with open(score_file, "r") as f:
                 score = f.read()
             print(f"Score loaded from {score_file}")
-            print(score)
         except FileNotFoundError:
             print(f"File {score_file} not found. Using default score.")
             score = "s1r 2eb 2f 2g | 2bb 2g 3g 1r | 1f 1f 2eb 3f 1r | 2eb 2c 2eb 2f | 5g 3r | t2eb " \
@@ -46,7 +45,7 @@ def main(*args):
             score_file = "sheets/temp.wmusic"
             with open(score_file, "w") as f:
                 f.write(score)
-            print(score)
+        print(score)
         try:
             main_pybind(["1", score_file]) # why need to pass another argument?
             # Music(score).playscore(filename="m.wav", sample_rate=44100, bpm=100)
