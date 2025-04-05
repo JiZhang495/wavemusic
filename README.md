@@ -104,18 +104,6 @@ To build a standalone app:
 uv run pyinstaller main.py --onefile 
 # pyinstaller main.py --onefile --clean --noconsole --icon=icon.ico
 ```
-or
-```bash
-uv run main.py gui
-```
-To use command-line interface:
-```bash
-uv run main.py cli
-```
-To generate WAV from score:
-```bash
-uv run main.py sheets/<title>.wmusic
-```
 
 
 ----
