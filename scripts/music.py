@@ -13,10 +13,10 @@ class Music:
         self.score = score.replace("|", "") # remove the bar lines
         self.notes = []
         self.score_to_notes()
-    
+
     def __str__(self):
         return self.score
-    
+
     def score_to_notes(self):
         notelist = self.score.split()
         shape = "t"  # default shape
@@ -51,11 +51,11 @@ class Music:
             if is_integer(n[-1]):
                 octave = int(n[-1])
                 n = n[:-1]
-            
+
             note_obj = Note(shape=shape, length=length, octave=octave)
             note_obj.update(n)  # update the note name and frequency
             self.notes.append(note_obj)
-    
+
     def write_wav(self, filename="m.wav", sample_rate=44100, bpm=100): #44100 Hz
         rawdata = []
         for note_obj in self.notes:
@@ -69,7 +69,7 @@ class Music:
             # f.writeframesraw(b"".join([struct.pack("<h", d) for d in rawdata]))
             # for d in rawdata:
             #     f.writeframesraw(struct.pack("<h", d))
-    
+
     def playscore(self, filename="m.wav", sample_rate=44100, bpm=100):
         self.write_wav(filename=filename, sample_rate=sample_rate, bpm=bpm)
         play_wav(filename=filename)

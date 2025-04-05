@@ -84,7 +84,7 @@ class WaveMusicGUI:
                 self.load_score_filepath(file_path)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load file: {e}")
-    
+
     def load_score_filepath(self, file_path):
         # Clear existing score entries
         self.part0.score_entry.delete(1.0, tk.END)
@@ -129,7 +129,7 @@ class WaveMusicGUI:
                 self.save_score_filepath(file_path)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to save file: {e}")
-    
+
     def save_score_filepath(self, file_path):
         with open(file_path, 'w') as file:
             waveform0 = self.part0.waveform_var.get()
@@ -158,7 +158,7 @@ class WaveMusicGUI:
         #     return
         if not self.filename.get():
             messagebox.showwarning("Warning", "Filename is empty!")
-            return     
+            return
         filename = self.filename.get()
         if not filename.endswith(".wav"):
             filename += ".wav"
@@ -180,5 +180,3 @@ class WaveMusicGUI:
     def create_wav_cpp(self):
         self.save_score_filepath("sheets/temp.wmusic")
         pass # Call the C++ function here to create the WAV file
-
-        

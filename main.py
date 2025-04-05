@@ -70,7 +70,7 @@ def main(*args):
         print("Playing score...")
     except Exception as e:
         print(f"Error playing score: {e}")
-    
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
