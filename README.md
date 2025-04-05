@@ -73,18 +73,36 @@ References:
 <https://docs.python.org/3/library/wave.html>
 <https://www.tutorialspoint.com/read-and-write-wav-files-using-python-wave>
 
-The demo song is "Ting Wo Shuo Xie Xie Ni".
-We would like to add more features to the program to produce chords and more complicated melodies in the future.
-
+To incorporate the C++ code as a backend, use pybind11:
+```bash
+sudo apt install python3-dev g++ cmake pybind11-dev
+```
+```bash
+uv run setup.py build_ext --inplace
+```
+where uv is recommended for dependency management.
 
 To run the python script:
 ```bash
-./main.py
+uv run main.py
+```
+or
+```bash
+uv run main.py gui
+```
+To use command-line interface:
+```bash
+uv run main.py cli
+```
+To generate WAV from score:
+```bash
+uv run main.py sheets/<title>.wmusic
 ```
 
-With uv:
+To build a standalone app:
 ```bash
-uv run main.py
+uv run pyinstaller main.py --onefile 
+# pyinstaller main.py --onefile --clean --noconsole --icon=icon.ico
 ```
 
 
