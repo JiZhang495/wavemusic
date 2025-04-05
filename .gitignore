@@ -2,6 +2,8 @@
 *.o
 *.out
 *~
+*.exe
+
 simple
 
 sheets/temp.wmusic
@@ -13,9 +15,13 @@ scripts/__pycache__/
 __pycache__/
 *.py[cod]
 
+# Ruff stuff
+.ruff_cache/
+
 # Complied extension modules
 *.so
 *.pyd
+*.dll
 
 # Build artifacts
 build/
