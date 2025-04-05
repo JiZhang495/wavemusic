@@ -140,24 +140,19 @@ g++ --version
 python --version
 cmake --version
 ```
-
+Set up .venv and dependencies (uv can be tricky in MSYS2 Mingw)
 ```bash
 python -m venv .venv
 source .venv/bin/activate
+pip install --upgrade -r requirements.txt
+```
+```bash
 python setup.py build_ext --inplace
 ```
-
-python main.py
-
-export PATH="$HOME/.cargo/bin:$PATH"
-source ~/.bash_profile  # or ~/.bashrc
-
+To run the python script:
 ```bash
-echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bash_profile
-source ~/.bash_profile
+python main.py
 ```
-
-
 
 
 ----
