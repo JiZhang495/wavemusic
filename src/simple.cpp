@@ -7,6 +7,8 @@
 #endif
 #include <vector>
 #include <regex>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include "sigen.h"
 
@@ -90,7 +92,7 @@ score_t parse(std::string str_in) {
     return score;
 };
 
-int main(int argc, char **argv) {
+int playscore(int argc, char **argv) {
     #ifdef DEBUG
     static_assert(sizeof(wav_hdr_t) == 44, "wav_hdr_t size error");
     #endif
@@ -175,4 +177,28 @@ int main(int argc, char **argv) {
     }
 
     return 0;
+}
+
+int main(int argc, char **argv) {
+    return playscore(argc, argv);
+}
+
+
+// Pybind11 module
+
+int main_pybind(std::vector<std::string> args) {
+    std::vector<char*> cstrs;
+    for (auto& s : args)
+        cstrs.push_back(const_cast<char*>(s.c_str()));
+
+    cstrs.push_back(nullptr);  // optional if legacy code expects null-terminated argv
+
+    int argc = static_cast<int>(args.size());
+    char** argv = cstrs.data();
+
+    return playscore(argc, argv);
+}
+
+PYBIND11_MODULE(simple, m) {
+    m.def("main_pybind", &main_pybind, "Play a score");
 }

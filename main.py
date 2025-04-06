@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-from scripts.music import Music
 import tkinter as tk
 import sys
+from src.simple import main_pybind
 from scripts.gui import WaveMusicGUI
 from scripts.music import Music
 
@@ -42,9 +42,13 @@ def main(*args):
             score = "s1r 2eb 2f 2g | 2bb 2g 3g 1r | 1f 1f 2eb 3f 1r | 2eb 2c 2eb 2f | 5g 3r | t2eb " \
                     "2c 3eb 1r | 1bb3 1bb3 2f4 3eb 1r | 2g 2f 2f 2eb | 4f q2eb 2f | 2bb 2g 3g 1r | 1f 1f 2eb 3f 1r | "\
                     "2eb 2c 2eb 2bb | 5g 3r | w2eb 2c 3eb 1r | 1bb3 1bb3 2f4 3eb 1r | 2g 2f 2eb 2c | 4eb"
+            score_file = "sheets/temp.wmusic"
+            with open(score_file, "w") as f:
+                f.write(score)
         print(score)
         try:
-            Music(score).playscore(filename="m.wav", sample_rate=44100, bpm=100)
+            main_pybind(["1", score_file]) # why need to pass another argument?
+            # Music(score).playscore(filename="m.wav", sample_rate=44100, bpm=100)
             print("Playing score...")
             return
         except Exception as e:
@@ -65,8 +69,13 @@ def main(*args):
     if score is None or score == "":
         print("No score entered. Exiting...")
         return
+    score_file = "sheets/temp.wmusic"
+    with open(score_file, "w") as f:
+        f.write(score)
+    print("Score saved to sheets/temp.wmusic")
     try:
-        Music(score).playscore(filename="m.wav", sample_rate=44100, bpm=100)
+        main_pybind(["1", score_file]) # why need to pass another argument?
+        # Music(score).playscore(filename="m.wav", sample_rate=44100, bpm=100)
         print("Playing score...")
     except Exception as e:
         print(f"Error playing score: {e}")
