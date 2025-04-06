@@ -73,6 +73,11 @@ References:
 <https://docs.python.org/3/library/wave.html>
 <https://www.tutorialspoint.com/read-and-write-wav-files-using-python-wave>
 
+
+### On Linux
+
+(Note: WSL may need extra configuration to display GUI and play sound.)
+
 To incorporate the C++ code as a backend, use pybind11:
 ```bash
 sudo apt install python3-dev g++ cmake pybind11-dev
@@ -80,7 +85,7 @@ sudo apt install python3-dev g++ cmake pybind11-dev
 ```bash
 uv run setup.py build_ext --inplace
 ```
-where uv is recommended for dependency management.
+where [uv](https://docs.astral.sh/uv/) is recommended for dependency management.
 
 To run the python script:
 ```bash
@@ -104,6 +109,55 @@ To build a standalone app:
 uv run pyinstaller main.py --onefile 
 # pyinstaller main.py --onefile --clean --noconsole --icon=icon.ico
 ```
+
+
+### On Windows
+
+Use [MSYS2](https://www.msys2.org/) MINGW x64 terminal:
+```bash
+pacman -Syu
+# Close terminal, reopen it (again in MinGW 64-bit)
+pacman -Syu
+```
+To use inside VScode: In VScode, open Settings, search for 'terminal.integrated.profiles.windows' - Edit in settings.json - add:
+```json
+"terminal.integrated.profiles.windows": {
+  "MSYS2 MinGW 64-bit": {
+    "path": "C:\\msys64\\usr\\bin\\bash.exe",
+    "args": ["--login", "-i"],
+    "env": {
+      "MSYSTEM": "MINGW64",
+      "CHERE_INVOKING": "1"
+    }
+  }
+},
+"terminal.integrated.defaultProfile.windows": "MSYS2 MinGW 64-bit"
+```
+Restart VScode, open terminal.
+```bash
+pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-python-pip mingw-w64-x86_64-pybind11 git
+g++ --version
+python --version
+cmake --version
+```
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python setup.py build_ext --inplace
+```
+
+python main.py
+
+export PATH="$HOME/.cargo/bin:$PATH"
+source ~/.bash_profile  # or ~/.bashrc
+
+```bash
+echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bash_profile
+source ~/.bash_profile
+```
+
+
 
 
 ----

@@ -64,7 +64,7 @@ class WaveMusicGUI:
         self.filename_entry.pack(side=tk.TOP, padx=5)
         # tickbox for playing WAV
         self.play_var = tk.BooleanVar()
-        self.play_var.set(True)  # default to checked
+        self.play_var.set(False)  # default to unchecked
         self.play_checkbutton = tk.Checkbutton(self.musicfile_frame, text="Play WAV after creation", variable=self.play_var)
         self.play_checkbutton.pack(side=tk.TOP, padx=5)
         self.play_checkbutton.config(font=("Arial", 9))
@@ -173,6 +173,8 @@ class WaveMusicGUI:
 
         except Exception as e:
             messagebox.showerror("Error", f"Failed to create WAV file: {e}")
+
+        # no need below because C++ implementation already plays the sound
         if self.play_var.get():
             try:
                 play_wav(filename=filename)

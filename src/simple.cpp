@@ -7,8 +7,7 @@
 #endif
 #include <vector>
 #include <regex>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <cstdint> // added for uint8_t, uint32_t, etc.
 
 #include "sigen.h"
 
@@ -43,7 +42,7 @@ score_t parse(std::string str_in) {
     std::sregex_token_iterator iter(str_in.begin(), str_in.end(), rgx_delim, -1);
     std::sregex_token_iterator end;
 
-    shape_t s = none;
+    shape_t s = shape_t::none;
     int l = 0;
     std::string n;
     int o = 4;
@@ -53,13 +52,13 @@ score_t parse(std::string str_in) {
         // instrument headers
         if (token.back() == ':') {
             if (token == "sine:") {
-                s = sine;
+                s = shape_t::sine;
             } else if (token == "square:") {
-                s = square;
+                s = shape_t::square;
             } else if (token == "triangle:") {
-                s = triangle;
+                s = shape_t::triangle;
             } else if (token == "saw:") {
-                s = saw;
+                s = shape_t::saw;
             }
             if (!stave.empty()) {
                 score.push_back(stave);
@@ -78,7 +77,7 @@ score_t parse(std::string str_in) {
 
                 // rests
                 if (n == "R") {
-                    stave.push_back({none, l, n, o});
+                    stave.push_back({shape_t::none, l, n, o});
                 } else {
                     stave.push_back({s, l, n, o});
                 }
@@ -157,18 +156,24 @@ int playscore(int argc, char **argv) {
 
     // play wav with system call
     bool played = false;
-    int rvalue = -1;
+
     #ifdef __APPLE__
-    rvalue = system("afplay " FILE_NAME " &");
+    int rvalue = system("afplay " FILE_NAME " &");
     if(rvalue == 0) { played = true; }
 
     #elif __linux__
     // check if aplay exists
-    rvalue = system("command -v aplay > /dev/null");
+    int rvalue = system("command -v aplay > /dev/null");
     if (rvalue == 0) {
         rvalue = system("aplay " FILE_NAME " &");
         if(rvalue == 0) { played = true; }
     }
+
+    #elif _WIN32
+    // Windows: use PowerShell's PlaySound (async playback)
+    std::string cmd = "start /B vlc --intf dummy --play-and-exit " FILE_NAME;
+    int rvalue = system(cmd.c_str());
+    if (rvalue == 0) { played = true; }
 
     #endif
 
@@ -179,12 +184,17 @@ int playscore(int argc, char **argv) {
     return 0;
 }
 
+#ifndef BUILD_PYBIND
 int main(int argc, char **argv) {
     return playscore(argc, argv);
 }
-
+#endif
 
 // Pybind11 module
+
+#ifdef BUILD_PYBIND
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 int main_pybind(std::vector<std::string> args) {
     std::vector<char*> cstrs;
@@ -202,3 +212,4 @@ int main_pybind(std::vector<std::string> args) {
 PYBIND11_MODULE(simple, m) {
     m.def("main_pybind", &main_pybind, "Play a score");
 }
+#endif // BUILD_PYBIND

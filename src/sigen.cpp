@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <cassert>
 #endif
-
+#include <cstdint> // added for uint8_t, uint32_t, etc.
 #include "sigen.h"
 
 f_lut_t note_t::construct_lut() {
@@ -106,15 +106,15 @@ void play(std::vector<int16_t> &pcm_data, int &ptr, shape_t shape,
     for (int i = 0; i < s_len; ++i) {
         // generate base signal
         switch (shape) {
-            case none:
+            case shape_t::none:
                 wave = 0;
                 break;
 
-            case sine:
+            case shape_t::sine:
                 wave = (float)SIN_AMP * sin(2.0*M_PI*freq*i/S_RATE);
                 break;
 
-            case square:
+            case shape_t::square:
                 if (sign) {
                     wave = SQR_AMP;
                 } else {
@@ -128,7 +128,7 @@ void play(std::vector<int16_t> &pcm_data, int &ptr, shape_t shape,
                 }
                 break;
 
-            case triangle:
+            case shape_t::triangle:
                 wave = count * gradient * TRI_AMP - TRI_AMP;
                 if (!sign) {
                     wave = -wave;
@@ -141,7 +141,7 @@ void play(std::vector<int16_t> &pcm_data, int &ptr, shape_t shape,
                 }
                 break;
 
-            case saw:
+            case shape_t::saw:
                 wave = count * gradient * SAW_AMP - SAW_AMP;
                 count += 1.0;
                 if (count > period) {
@@ -151,7 +151,7 @@ void play(std::vector<int16_t> &pcm_data, int &ptr, shape_t shape,
         }
 
         // apply attack/release filter
-        if (shape == none) {
+        if (shape == shape_t::none) {
             gain = 0;
         } else {
             gain = filter(i, s_len);

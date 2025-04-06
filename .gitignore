@@ -2,6 +2,8 @@
 *.o
 *.out
 *~
+*.exe
+
 simple
 
 sheets/temp.wmusic
@@ -16,6 +18,7 @@ __pycache__/
 # Complied extension modules
 *.so
 *.pyd
+*.dll
 
 # Build artifacts
 build/
