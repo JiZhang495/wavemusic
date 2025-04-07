@@ -163,8 +163,12 @@ pyinstaller main.py --onefile
 ----
 Python TODO list:
 
+ - [ ] time different implementations main_cpp.py, main_list.py, main_np.py and compare with C++
+ - [ ] write tests
+ - [ ] add docs
  - [x] use C++ code as a backend
  - [x] add waveforms.py to store functions for each waveform
+ - [ ] add Entry with up/down for transpose
  - [ ] use () to pass frequecies or chords
  - [ ] add bpm and sample rate selection
  - [ ] use numpy for faster performance
@@ -172,7 +176,7 @@ Python TODO list:
  - [ ] add loudness: ff, f, fp, p, pp
  - [ ] add dynamics: cresc, dim
  - [ ] add timber
- - [x] GUI
+ - [x] GUI (maybe try webapp next? Electrojs?)
  - [ ] add polyphony (fugue)
  - [ ] live waveform plotting matplotlib like oscilloscope
  - [x] playsound on the go with Enter (plays the line just completed)
